@@ -1,0 +1,122 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.pyc
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project specific
+data/raw/
+data/parsed/
+data/*.json
+data/*.db
+*.ufdr
+*.zip
+
+# Sensitive data
+*.key
+*.pem
+*.cert
+*.crt
+secrets/
+credentials/
+ingest_manifest.json
+
+# Models (too large for git)
+infra/models/embeddings/*
+infra/models/llm/*
+!infra/models/embeddings/.gitkeep
+!infra/models/llm/.gitkeep
+
+# Indexes and databases
+*.faiss
+*.index
+neo4j/data/
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+audit_logs/
+
+# Media files
+*.mp4
+*.mp3
+*.wav
+*.jpg
+*.jpeg
+*.png
+*.pdf
+!docs/*.pdf
+
+# Docker
+.dockerignore
+
+# Backups
+*.bak
+*.backup
+infra/backups/*
+!infra/backups/.gitkeep
+
+# Monitoring
+prometheus_data/
+grafana_data/
+
+# Cache
+.cache/
+*.cache
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Offline bundle (too large)
+infra/offline_bundle/*
+!infra/offline_bundle/README.md

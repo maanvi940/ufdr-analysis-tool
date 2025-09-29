@@ -1,0 +1,61 @@
+# Core Dependencies for UFDR Analysis Tool
+# Optimized for offline deployment and government security requirements
+
+# Core Python utilities
+python-dateutil==2.8.2
+phonenumbers==8.13.20
+python-dotenv==1.0.0
+pydantic==2.4.2
+typing-extensions==4.8.0
+
+# XML Processing
+lxml==4.9.3
+xmltodict==0.13.0
+
+# Data Processing
+pandas==2.1.1
+numpy==1.24.3
+scipy==1.11.3
+
+# Cryptography & Security
+cryptography==41.0.5
+pycryptodome==3.19.0
+hashlib
+jwcrypto==1.5.0
+
+# Logging & Monitoring
+loguru==0.7.2
+python-json-logger==2.0.7
+
+# Configuration
+pyyaml==6.0.1
+toml==0.10.2
+
+# CLI
+click==8.1.7
+rich==13.6.0
+typer==0.9.0
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# Code Quality
+black==23.9.1
+flake8==6.1.0
+mypy==1.6.0
+pylint==3.0.1
+
+# API Development
+fastapi==0.104.1
+uvicorn[standard]==0.23.2
+pydantic-settings==2.0.3
+
+# Async Support
+aiofiles==23.2.1
+asyncio==3.4.3
+
+# JSON handling
+orjson==3.9.9
+ujson==5.8.0
