@@ -1,0 +1,104 @@
+{
+  "case_id": "ct2",
+  "created_at": "2025-10-07T21:42:45.744482",
+  "last_updated": "2025-10-07T21:42:45.768478",
+  "total_files": 0,
+  "processed_files": 8,
+  "quick_reports": {
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\1.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\1.jpg",
+      "file_name": "1.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.744482",
+      "processing_time_ms": 78.00173759460449
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\2.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\2.jpg",
+      "file_name": "2.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.747482",
+      "processing_time_ms": 0.0
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\3.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\3.jpg",
+      "file_name": "3.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.751496",
+      "processing_time_ms": 0.0
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\4.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\4.jpg",
+      "file_name": "4.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.755479",
+      "processing_time_ms": 0.9989738464355469
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\5.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\5.jpg",
+      "file_name": "5.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.758479",
+      "processing_time_ms": 0.0
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\6.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\6.jpg",
+      "file_name": "6.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.761478",
+      "processing_time_ms": 0.0
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\every-detail-of-a-sleek-modern-car-captured-in-close-up-photo.jpg": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\every-detail-of-a-sleek-modern-car-captured-in-close-up-photo.jpg",
+      "file_name": "every-detail-of-a-sleek-modern-car-captured-in-close-up-photo.jpg",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.764478",
+      "processing_time_ms": 0.0
+    },
+    "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\1.png": {
+      "file_path": "C:\\Users\\karti\\Desktop\\ufdr-analysis-tool\\uploads\\ufdr_extractions\\ct2\\media\\1.png",
+      "file_name": "1.png",
+      "objects_detected": [],
+      "dominant_objects": [],
+      "scene_type": "unknown",
+      "has_faces": false,
+      "face_count": 0,
+      "processed_at": "2025-10-07T21:42:45.767478",
+      "processing_time_ms": 0.0
+    }
+  },
+  "detailed_reports": {},
+  "clip_embeddings": {},
+  "metadata": {
+    "yolo_model": "yolov8",
+    "llm_model": "llama3.1:8b",
+    "clip_model": "openai/clip-vit-base-patch32"
+  }
+}

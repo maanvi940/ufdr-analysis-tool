@@ -1,0 +1,42 @@
+[
+  {
+    "nl": "Find all persons with phone number containing '123'",
+    "cypher": "MATCH (p:Person) WHERE p.phone CONTAINS '123' RETURN p"
+  },
+  {
+    "nl": "Show messages containing the word 'bitcoin'",
+    "cypher": "MATCH (m:Message) WHERE m.text CONTAINS 'bitcoin' RETURN m"
+  },
+  {
+    "nl": "Find calls longer than 5 minutes",
+    "cypher": "MATCH (c:Call) WHERE c.duration > 300 RETURN c"
+  },
+  {
+    "nl": "Show all images with text about crypto wallets",
+    "cypher": "MATCH (m:Media) WHERE m.type CONTAINS 'image' AND m.ocr_text CONTAINS 'crypto wallet' RETURN m"
+  },
+  {
+    "nl": "Find messages sent between January 1, 2023 and February 1, 2023",
+    "cypher": "MATCH (m:Message) WHERE m.timestamp >= datetime('2023-01-01') AND m.timestamp <= datetime('2023-02-01') RETURN m"
+  },
+  {
+    "nl": "Show all persons who sent messages containing 'meeting'",
+    "cypher": "MATCH (p:Person)-[:SENT]->(m:Message) WHERE m.text CONTAINS 'meeting' RETURN DISTINCT p"
+  },
+  {
+    "nl": "Find cases linked to case 'CASE_001'",
+    "cypher": "MATCH (c1:Case {case_id: 'CASE_001'})-[r:LINKED_TO]->(c2:Case) RETURN c1, r, c2"
+  },
+  {
+    "nl": "Show all crypto addresses mentioned in messages",
+    "cypher": "MATCH (m:Message)-[:REFERENCES]->(c:CryptoAddress) RETURN c, m"
+  },
+  {
+    "nl": "Find persons who called the number '+919876543210'",
+    "cypher": "MATCH (p:Person)-[:MADE]->(c:Call) WHERE c.number = '+919876543210' RETURN DISTINCT p"
+  },
+  {
+    "nl": "Show all media files with a specific hash",
+    "cypher": "MATCH (m:Media) WHERE m.sha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' RETURN m"
+  }
+]

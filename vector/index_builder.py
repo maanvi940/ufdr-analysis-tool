@@ -8,9 +8,8 @@ import json
 import logging
 import pickle
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional
 from dataclasses import dataclass, asdict
-import numpy as np
 try:
     import faiss
     FAISS_AVAILABLE = True
@@ -18,7 +17,6 @@ except ImportError:
     FAISS_AVAILABLE = False
     print("Warning: FAISS not available. Using simple in-memory search.")
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 import hashlib
 
 # Configure logging

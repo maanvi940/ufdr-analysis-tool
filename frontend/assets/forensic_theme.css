@@ -1,0 +1,1195 @@
+/**
+ * UFDR Analysis Tool - Modern Clean Theme
+ * Professional SaaS Aesthetic with Smooth Animations
+ * 
+ * Design Philosophy:
+ * - Clean, light, professional interface
+ * - Soft shadows and subtle depth
+ * - Smooth micro-interactions
+ * - Card-based layouts with generous spacing
+ * - Modern typography with excellent readability
+ * - Animated transitions for engaging UX
+ */
+
+/* ========================================
+   IMPORTS & FONTS
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap');
+
+/* ========================================
+   CSS VARIABLES - DESIGN TOKENS
+   ======================================== */
+:root {
+    /* Primary Colors - Soft Professional Blue */
+    --primary-50: #EFF6FF;
+    --primary-100: #DBEAFE;
+    --primary-200: #BFDBFE;
+    --primary-300: #93C5FD;
+    --primary-400: #60A5FA;
+    --primary-500: #3B82F6;
+    --primary-600: #2563EB;
+    --primary-700: #1D4ED8;
+    
+    /* Secondary Colors - Teal Accent */
+    --secondary-50: #F0FDFA;
+    --secondary-100: #CCFBF1;
+    --secondary-200: #99F6E4;
+    --secondary-300: #5EEAD4;
+    --secondary-400: #2DD4BF;
+    --secondary-500: #14B8A6;
+    --secondary-600: #0D9488;
+    
+    /* Accent Colors */
+    --accent-purple: #8B5CF6;
+    --accent-pink: #EC4899;
+    --accent-orange: #F97316;
+    --accent-green: #10B981;
+    --accent-red: #EF4444;
+    --accent-yellow: #F59E0B;
+    
+    /* Neutral Colors */
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1E293B;
+    --gray-900: #0F172A;
+    
+    /* Background Colors */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8FAFC;
+    --bg-tertiary: #F1F5F9;
+    --bg-elevated: #FFFFFF;
+    
+    /* Text Colors */
+    --text-primary: #1E293B;
+    --text-secondary: #475569;
+    --text-tertiary: #64748B;
+    --text-muted: #94A3B8;
+    --text-inverse: #FFFFFF;
+    
+    /* Border Colors */
+    --border-light: #E2E8F0;
+    --border-medium: #CBD5E1;
+    --border-strong: #94A3B8;
+    
+    /* Shadows - Soft & Layered */
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    --shadow-glow-teal: 0 0 20px rgba(20, 184, 166, 0.3);
+    
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    
+    /* Spacing Scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    
+    /* Typography */
+    --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ========================================
+   GLOBAL RESET & BASE STYLES
+   ======================================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-body) !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Streamlit Main Container */
+.main {
+    background-color: var(--bg-secondary) !important;
+    padding: var(--space-6) !important;
+    animation: fadeInUp 0.6s ease-out !important;
+}
+
+.block-container {
+    padding-top: var(--space-6) !important;
+    padding-bottom: var(--space-6) !important;
+    max-width: 1600px !important;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   SIDEBAR - Modern Navigation
+   ======================================== */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--gray-50) 100%) !important;
+    border-right: 1px solid var(--border-light) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    background: transparent !important;
+}
+
+/* Sidebar Logo Area */
+[data-testid="stSidebar"] .element-container:first-child {
+    padding: var(--space-6) var(--space-4) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    margin-bottom: var(--space-4) !important;
+}
+
+/* Sidebar Headers */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    font-family: var(--font-display) !important;
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    margin: var(--space-4) 0 var(--space-3) !important;
+    padding: 0 var(--space-4) !important;
+}
+
+/* Sidebar Navigation - Radio Buttons */
+[data-testid="stSidebar"] .row-widget.stRadio {
+    padding: 0 var(--space-3) !important;
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio > div {
+    gap: var(--space-2) !important;
+    flex-direction: column !important;
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio > div label {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--space-3) var(--space-4) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    transition: all var(--transition-base) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-3) !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio > div label:hover {
+    background: var(--primary-50) !important;
+    border-color: var(--primary-200) !important;
+    color: var(--primary-600) !important;
+    transform: translateX(4px) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio > div label[data-checked="true"] {
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%) !important;
+    border-color: var(--primary-600) !important;
+    color: var(--text-inverse) !important;
+    box-shadow: var(--shadow-md), var(--shadow-glow) !important;
+    transform: translateX(4px) !important;
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio > div label[data-checked="true"]:hover {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%) !important;
+}
+
+/* Sidebar Text */
+[data-testid="stSidebar"] p {
+    color: var(--text-secondary) !important;
+    font-size: 14px !important;
+    padding: 0 var(--space-4) !important;
+}
+
+/* Status Pills in Sidebar */
+[data-testid="stSidebar"] .element-container .stSuccess,
+[data-testid="stSidebar"] .element-container .stWarning,
+[data-testid="stSidebar"] .element-container .stInfo {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-left: 3px solid var(--secondary-500) !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--space-3) var(--space-4) !important;
+    margin: var(--space-2) var(--space-4) !important;
+    font-size: 13px !important;
+    box-shadow: var(--shadow-sm) !important;
+    animation: slideInLeft 0.4s ease-out !important;
+}
+
+[data-testid="stSidebar"] .element-container .stSuccess {
+    border-left-color: var(--accent-green) !important;
+}
+
+[data-testid="stSidebar"] .element-container .stWarning {
+    border-left-color: var(--accent-yellow) !important;
+}
+
+/* ========================================
+   HERO HEADER - Stunning Welcome
+   ======================================== */
+.main-header {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-purple) 50%, var(--secondary-500) 100%) !important;
+    background-size: 200% 200% !important;
+    animation: gradientShift 8s ease infinite !important;
+    border-radius: var(--radius-xl) !important;
+    padding: var(--space-10) var(--space-8) !important;
+    margin-bottom: var(--space-8) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: var(--shadow-xl), 0 0 40px rgba(59, 130, 246, 0.2) !important;
+    animation: fadeInUp 0.8s ease-out, gradientShift 8s ease infinite !important;
+}
+
+.main-header::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%) !important;
+    animation: float 6s ease-in-out infinite !important;
+}
+
+.main-header::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 100px !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent) !important;
+}
+
+.main-header h1 {
+    color: var(--text-inverse) !important;
+    font-family: var(--font-display) !important;
+    font-size: 42px !important;
+    font-weight: 800 !important;
+    margin: 0 0 var(--space-3) !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+    position: relative !important;
+    z-index: 1 !important;
+    letter-spacing: -0.5px !important;
+}
+
+.main-header h3 {
+    color: rgba(255,255,255,0.9) !important;
+    font-family: var(--font-display) !important;
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    margin: 0 0 var(--space-2) !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.main-header p {
+    color: rgba(255,255,255,0.7) !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+    font-family: var(--font-body) !important;
+}
+
+/* ========================================
+   CARD SYSTEM - Modern Glass Cards
+   ======================================== */
+.glass-card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-6) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all var(--transition-base) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    animation: fadeInUp 0.5s ease-out !important;
+}
+
+.glass-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--shadow-xl) !important;
+    border-color: var(--primary-200) !important;
+}
+
+.glass-card::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500)) !important;
+    opacity: 0 !important;
+    transition: opacity var(--transition-base) !important;
+}
+
+.glass-card:hover::before {
+    opacity: 1 !important;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-6) !important;
+    margin: var(--space-4) 0 !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all var(--transition-base) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    animation: fadeInUp 0.6s ease-out !important;
+}
+
+.feature-card:hover {
+    transform: translateY(-6px) scale(1.01) !important;
+    box-shadow: var(--shadow-xl) !important;
+    border-color: var(--primary-300) !important;
+}
+
+.feature-card::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 4px !important;
+    height: 100% !important;
+    background: linear-gradient(180deg, var(--primary-500), var(--secondary-500)) !important;
+    opacity: 0.8 !important;
+}
+
+.feature-card h3 {
+    color: var(--text-primary) !important;
+    font-family: var(--font-display) !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin-bottom: var(--space-3) !important;
+    padding-left: var(--space-3) !important;
+}
+
+.feature-card p {
+    color: var(--text-secondary) !important;
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+    margin: 0 !important;
+    padding-left: var(--space-3) !important;
+}
+
+/* ========================================
+   EVIDENCE CARDS
+   ======================================== */
+.evidence-card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--space-4) !important;
+    margin: var(--space-3) 0 !important;
+    box-shadow: var(--shadow-xs) !important;
+    transition: all var(--transition-base) !important;
+    animation: fadeInUp 0.4s ease-out !important;
+}
+
+.evidence-card:hover {
+    box-shadow: var(--shadow-md) !important;
+    border-color: var(--primary-200) !important;
+    transform: translateX(4px) !important;
+}
+
+.evidence-card-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-3) !important;
+    margin-bottom: var(--space-3) !important;
+}
+
+.evidence-card-thumbnail {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: var(--radius-md) !important;
+    object-fit: cover !important;
+    border: 2px solid var(--border-light) !important;
+    transition: transform var(--transition-fast) !important;
+}
+
+.evidence-card:hover .evidence-card-thumbnail {
+    transform: scale(1.05) !important;
+}
+
+.evidence-card-title {
+    color: var(--text-primary) !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    font-family: var(--font-display) !important;
+}
+
+/* Badge System */
+.evidence-card-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: var(--space-1) var(--space-3) !important;
+    border-radius: var(--radius-full) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.badge-image { 
+    background: linear-gradient(135deg, var(--primary-100), var(--primary-200)) !important; 
+    color: var(--primary-700) !important; 
+}
+.badge-video { 
+    background: linear-gradient(135deg, var(--secondary-100), var(--secondary-200)) !important; 
+    color: var(--secondary-700) !important; 
+}
+.badge-audio { 
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A) !important; 
+    color: #92400E !important; 
+}
+.badge-document { 
+    background: linear-gradient(135deg, var(--gray-100), var(--gray-200)) !important; 
+    color: var(--gray-700) !important; 
+}
+
+.evidence-card-provenance {
+    font-size: 12px !important;
+    color: var(--text-muted) !important;
+    margin-top: var(--space-3) !important;
+    padding-top: var(--space-3) !important;
+    border-top: 1px solid var(--border-light) !important;
+}
+
+.confidence-score {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: var(--space-1) !important;
+    padding: var(--space-1) var(--space-3) !important;
+    border-radius: var(--radius-full) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.confidence-high { 
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0) !important; 
+    color: #065F46 !important; 
+}
+.confidence-med { 
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A) !important; 
+    color: #92400E !important; 
+}
+.confidence-low { 
+    background: linear-gradient(135deg, #FEE2E2, #FECACA) !important; 
+    color: #991B1B !important; 
+}
+
+/* ========================================
+   SEARCH COMPONENTS
+   ======================================== */
+.search-container {
+    margin: var(--space-8) 0 !important;
+    position: relative !important;
+}
+
+.search-input-wrapper {
+    background: var(--bg-primary) !important;
+    border: 2px solid var(--border-light) !important;
+    border-radius: var(--radius-xl) !important;
+    padding: var(--space-4) var(--space-6) !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: all var(--transition-base) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-4) !important;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-400) !important;
+    box-shadow: var(--shadow-lg), var(--shadow-glow) !important;
+    transform: translateY(-2px) !important;
+}
+
+.search-icon {
+    color: var(--primary-500) !important;
+    font-size: 22px !important;
+}
+
+/* ========================================
+   FORM ELEMENTS - Inputs & Textareas
+   ======================================== */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stNumberInput > div > div > input {
+    background: var(--bg-primary) !important;
+    border: 1.5px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-body) !important;
+    font-size: 15px !important;
+    padding: var(--space-4) var(--space-5) !important;
+    transition: all var(--transition-base) !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus,
+.stNumberInput > div > div > input:focus {
+    border-color: var(--primary-400) !important;
+    box-shadow: var(--shadow-md), 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    outline: none !important;
+}
+
+.stTextInput > div > div > input::placeholder,
+.stTextArea > div > div > textarea::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Select Box & Multiselect */
+.stSelectbox > div > div,
+.stMultiselect > div > div {
+    background: var(--bg-primary) !important;
+    border: 1.5px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.stSelectbox > div > div:focus-within,
+.stMultiselect > div > div:focus-within {
+    border-color: var(--primary-400) !important;
+    box-shadow: var(--shadow-md), 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* ========================================
+   BUTTONS - Modern Gradient Style
+   ======================================== */
+.stButton > button {
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%) !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-inverse) !important;
+    padding: var(--space-4) var(--space-6) !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    font-family: var(--font-display) !important;
+    transition: all var(--transition-base) !important;
+    box-shadow: var(--shadow-md), 0 4px 14px rgba(59, 130, 246, 0.4) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+}
+
+.stButton > button::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
+    transition: left 0.5s !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-lg), 0 6px 20px rgba(59, 130, 246, 0.5) !important;
+}
+
+.stButton > button:hover::before {
+    left: 100% !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* Secondary Button */
+.stButton > button[kind="secondary"] {
+    background: var(--bg-primary) !important;
+    border: 1.5px solid var(--border-light) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.stButton > button[kind="secondary"]:hover {
+    background: var(--gray-50) !important;
+    border-color: var(--gray-300) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* ========================================
+   METRICS - Beautiful Stat Cards
+   ======================================== */
+[data-testid="stMetric"] {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--gray-50) 100%) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-5) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all var(--transition-base) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    animation: fadeInUp 0.5s ease-out !important;
+}
+
+[data-testid="stMetric"]:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--primary-200) !important;
+}
+
+[data-testid="stMetric"]::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, var(--primary-500), var(--secondary-500)) !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--text-tertiary) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    margin-bottom: var(--space-2) !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: var(--primary-600) !important;
+    font-size: 36px !important;
+    font-weight: 800 !important;
+    font-family: var(--font-display) !important;
+    letter-spacing: -1px !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stMetricDelta"][data-positive="true"] {
+    color: var(--accent-green) !important;
+}
+
+[data-testid="stMetricDelta"][data-negative="true"] {
+    color: var(--accent-red) !important;
+}
+
+/* ========================================
+   DATA TABLES - Modern Styling
+   ======================================== */
+.dataframe {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden !important;
+    box-shadow: var(--shadow-sm) !important;
+    animation: fadeInUp 0.5s ease-out !important;
+}
+
+.dataframe thead {
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%) !important;
+    border-bottom: 2px solid var(--primary-200) !important;
+}
+
+.dataframe th {
+    color: var(--primary-700) !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: var(--space-4) var(--space-5) !important;
+    border: none !important;
+    font-family: var(--font-display) !important;
+}
+
+.dataframe td {
+    color: var(--text-secondary) !important;
+    font-size: 14px !important;
+    padding: var(--space-3) var(--space-5) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    transition: background var(--transition-fast) !important;
+}
+
+.dataframe tbody tr:hover {
+    background: var(--primary-50) !important;
+}
+
+.dataframe tbody tr:hover td {
+    color: var(--text-primary) !important;
+}
+
+/* Streamlit Dataframe Override */
+[data-testid="stDataFrame"] {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* ========================================
+   TABS - Modern Pill Design
+   ======================================== */
+.stTabs [data-baseweb="tab-list"] {
+    gap: var(--space-2) !important;
+    background: var(--bg-tertiary) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-2) !important;
+    margin-bottom: var(--space-6) !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--space-3) var(--space-5) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    font-family: var(--font-display) !important;
+    transition: all var(--transition-base) !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%) !important;
+    color: var(--text-inverse) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* ========================================
+   EXPANDERS - Clean Collapsible Sections
+   ======================================== */
+.streamlit-expanderHeader {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--gray-50) 100%) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    font-family: var(--font-display) !important;
+    padding: var(--space-4) var(--space-5) !important;
+    transition: all var(--transition-base) !important;
+    box-shadow: var(--shadow-xs) !important;
+}
+
+.streamlit-expanderHeader:hover {
+    background: var(--bg-primary) !important;
+    border-color: var(--primary-200) !important;
+    box-shadow: var(--shadow-md) !important;
+    transform: translateX(4px) !important;
+}
+
+.streamlit-expanderContent {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-top: none !important;
+    border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
+    padding: var(--space-5) !important;
+    animation: fadeIn 0.3s ease-out !important;
+}
+
+/* ========================================
+   ALERTS & NOTIFICATIONS
+   ======================================== */
+.stSuccess, .success-box {
+    background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%) !important;
+    border: 1px solid #86EFAC !important;
+    border-left: 4px solid var(--accent-green) !important;
+    border-radius: var(--radius-md) !important;
+    color: #166534 !important;
+    padding: var(--space-4) var(--space-5) !important;
+    box-shadow: var(--shadow-sm) !important;
+    animation: slideInRight 0.4s ease-out !important;
+}
+
+.stWarning, .warning-box {
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+    border: 1px solid #FCD34D !important;
+    border-left: 4px solid var(--accent-yellow) !important;
+    border-radius: var(--radius-md) !important;
+    color: #92400E !important;
+    padding: var(--space-4) var(--space-5) !important;
+    box-shadow: var(--shadow-sm) !important;
+    animation: slideInRight 0.4s ease-out !important;
+}
+
+.stError {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+    border: 1px solid #FCA5A5 !important;
+    border-left: 4px solid var(--accent-red) !important;
+    border-radius: var(--radius-md) !important;
+    color: #991B1B !important;
+    padding: var(--space-4) var(--space-5) !important;
+    box-shadow: var(--shadow-sm) !important;
+    animation: shake 0.5s ease-in-out !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.stInfo, .info-box {
+    background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%) !important;
+    border: 1px solid var(--primary-200) !important;
+    border-left: 4px solid var(--primary-500) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--primary-800) !important;
+    padding: var(--space-4) var(--space-5) !important;
+    box-shadow: var(--shadow-sm) !important;
+    animation: slideInRight 0.4s ease-out !important;
+}
+
+/* ========================================
+   PROGRESS BARS - Animated
+   ======================================== */
+.stProgress > div > div {
+    background: var(--gray-100) !important;
+    border-radius: var(--radius-full) !important;
+    overflow: hidden !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+    height: 12px !important;
+}
+
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--primary-400), var(--primary-500), var(--secondary-400)) !important;
+    background-size: 200% 100% !important;
+    border-radius: var(--radius-full) !important;
+    animation: shimmer 2s infinite linear, gradientShift 3s infinite !important;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* ========================================
+   CODE BLOCKS
+   ======================================== */
+.stCode {
+    background: var(--gray-900) !important;
+    border: 1px solid var(--gray-700) !important;
+    border-radius: var(--radius-md) !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    font-size: 13px !important;
+    color: var(--primary-300) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* ========================================
+   FILE UPLOADER
+   ======================================== */
+[data-testid="stFileUploader"] {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--gray-50) 100%) !important;
+    border: 2px dashed var(--border-medium) !important;
+    border-radius: var(--radius-xl) !important;
+    padding: var(--space-8) !important;
+    transition: all var(--transition-base) !important;
+}
+
+[data-testid="stFileUploader"]:hover {
+    border-color: var(--primary-400) !important;
+    background: linear-gradient(135deg, var(--primary-50) 0%, var(--bg-primary) 100%) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+[data-testid="stFileUploader"] > div > div > div {
+    color: var(--text-tertiary) !important;
+    font-size: 15px !important;
+}
+
+/* ========================================
+   SPINNER & LOADING
+   ======================================== */
+[data-testid="stSpinner"] {
+    color: var(--primary-500) !important;
+}
+
+[data-testid="stSpinner"] > div {
+    border-color: var(--primary-200) !important;
+    border-top-color: var(--primary-500) !important;
+    animation: spin 0.8s linear infinite !important;
+}
+
+/* ========================================
+   SCROLLBARS - Modern
+   ======================================== */
+::-webkit-scrollbar {
+    width: 10px !important;
+    height: 10px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100) !important;
+    border-radius: var(--radius-full) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--gray-300), var(--gray-400)) !important;
+    border-radius: var(--radius-full) !important;
+    border: 2px solid var(--gray-100) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--gray-400), var(--gray-500)) !important;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.5px !important;
+}
+
+h1 { font-size: 36px !important; }
+h2 { font-size: 28px !important; }
+h3 { font-size: 22px !important; }
+h4 { font-size: 18px !important; }
+
+p, li {
+    color: var(--text-secondary) !important;
+    line-height: 1.7 !important;
+}
+
+strong {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* ========================================
+   DIVIDERS
+   ======================================== */
+hr {
+    border: none !important;
+    border-top: 1px solid var(--border-light) !important;
+    margin: var(--space-6) 0 !important;
+}
+
+/* ========================================
+   SLIDER
+   ======================================== */
+.stSlider > div > div > div {
+    background: var(--primary-500) !important;
+}
+
+.stSlider [role="slider"] {
+    background: var(--bg-primary) !important;
+    border: 2px solid var(--primary-500) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* ========================================
+   CHECKBOX & RADIO
+   ======================================== */
+.stCheckbox > div > div > div,
+.stRadio > div > div > div {
+    border-color: var(--border-medium) !important;
+}
+
+.stCheckbox > div > div > div[aria-checked="true"],
+.stRadio > div > div > div[aria-checked="true"] {
+    background: var(--primary-500) !important;
+    border-color: var(--primary-500) !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+    .main {
+        padding: var(--space-4) !important;
+    }
+    
+    .main-header {
+        padding: var(--space-6) var(--space-5) !important;
+    }
+    
+    .main-header h1 {
+        font-size: 28px !important;
+    }
+    
+    .glass-card {
+        padding: var(--space-5) !important;
+    }
+    
+    [data-testid="stMetricValue"] {
+        font-size: 28px !important;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+*:focus-visible {
+    outline: 2px solid var(--primary-400) !important;
+    outline-offset: 2px !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border-width: 0 !important;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out !important;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out !important;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out !important;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out !important;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.4s ease-out !important;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}

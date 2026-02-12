@@ -9,11 +9,9 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Generator, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from enum import Enum
-import xml.sax
-from xml.sax.handler import ContentHandler
 import lxml.etree as ET
 import phonenumbers
 from dateutil import parser as date_parser

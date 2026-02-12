@@ -1,0 +1,171 @@
+{
+  "entity_type": "message",
+  "version": "1.0.0",
+  "fields": {
+    "receiver": {
+      "name": "receiver",
+      "type": "phone",
+      "required": true,
+      "nullable": false,
+      "default": null,
+      "constraints": {},
+      "examples": [
+        "+918765432100",
+        "+918765432101",
+        "+918765432102",
+        "+918765432103",
+        "+918765432104"
+      ]
+    },
+    "sender": {
+      "name": "sender",
+      "type": "phone",
+      "required": true,
+      "nullable": false,
+      "default": null,
+      "constraints": {},
+      "examples": [
+        "+919876543200",
+        "+919876543201",
+        "+919876543202",
+        "+919876543203",
+        "+919876543204"
+      ]
+    },
+    "timestamp": {
+      "name": "timestamp",
+      "type": "datetime",
+      "required": true,
+      "nullable": false,
+      "default": null,
+      "constraints": {},
+      "examples": [
+        "2025-01-02T16:30:00",
+        "2025-01-02T16:30:01",
+        "2025-01-02T16:30:02",
+        "2025-01-02T16:30:03",
+        "2025-01-02T16:30:04"
+      ]
+    },
+    "record_uuid": {
+      "name": "record_uuid",
+      "type": "uuid",
+      "required": true,
+      "nullable": false,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "case_id": {
+      "name": "case_id",
+      "type": "text",
+      "required": true,
+      "nullable": false,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "detected_script": {
+      "name": "detected_script",
+      "type": "text",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "detected_language": {
+      "name": "detected_language",
+      "type": "text",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "detection_confidence": {
+      "name": "detection_confidence",
+      "type": "float",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "detection_reasons": {
+      "name": "detection_reasons",
+      "type": "json",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "src_file": {
+      "name": "src_file",
+      "type": "text",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "src_offset": {
+      "name": "src_offset",
+      "type": "integer",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "schema_version": {
+      "name": "schema_version",
+      "type": "text",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "raw_blob": {
+      "name": "raw_blob",
+      "type": "json",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "created_at": {
+      "name": "created_at",
+      "type": "datetime",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    },
+    "updated_at": {
+      "name": "updated_at",
+      "type": "datetime",
+      "required": false,
+      "nullable": true,
+      "default": null,
+      "constraints": {},
+      "examples": []
+    }
+  },
+  "indexes": [
+    "record_uuid",
+    "case_id",
+    "timestamp",
+    "sender",
+    "detection_confidence"
+  ],
+  "metadata": {
+    "sample_size": 5,
+    "inferred_at": "2025-10-02T17:03:54.523636Z"
+  },
+  "created_at": "2025-10-02T17:03:54.523636Z"
+}

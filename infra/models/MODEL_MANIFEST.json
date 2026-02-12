@@ -1,0 +1,71 @@
+{
+  "manifest_version": "1.0.0",
+  "created_at": "2025-09-30T06:30:00Z",
+  "description": "Checksums and metadata for all ML models used in UFDR Analysis Tool",
+  "models": {
+    "yolov8n.pt": {
+      "description": "YOLOv8 Nano - Object detection model",
+      "version": "8.0.0",
+      "size_mb": 6.2,
+      "sha256": "PLACEHOLDER_HASH_TO_BE_COMPUTED_ON_DOWNLOAD",
+      "source": "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt",
+      "license": "AGPL-3.0",
+      "required": true,
+      "download_command": "wget https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt"
+    },
+    "shape_predictor_68_face_landmarks.dat": {
+      "description": "dlib 68-point face landmark detector",
+      "version": "1.0",
+      "size_mb": 99.7,
+      "sha256": "PLACEHOLDER_HASH_TO_BE_COMPUTED_ON_DOWNLOAD",
+      "source": "http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2",
+      "license": "CC0",
+      "required": true,
+      "download_command": "wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 && bunzip2 shape_predictor_68_face_landmarks.dat.bz2"
+    },
+    "dlib_face_recognition_resnet_model_v1.dat": {
+      "description": "dlib face recognition ResNet model",
+      "version": "1.0",
+      "size_mb": 22.5,
+      "sha256": "PLACEHOLDER_HASH_TO_BE_COMPUTED_ON_DOWNLOAD",
+      "source": "http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2",
+      "license": "CC0",
+      "required": true,
+      "download_command": "wget http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2 && bunzip2 dlib_face_recognition_resnet_model_v1.dat.bz2"
+    },
+    "all-MiniLM-L6-v2": {
+      "description": "Sentence Transformers - Text embedding model",
+      "version": "2.2.2",
+      "size_mb": 90.9,
+      "sha256": "COMPUTED_FROM_HUGGINGFACE_MODEL_FILES",
+      "source": "sentence-transformers/all-MiniLM-L6-v2",
+      "license": "Apache-2.0",
+      "required": true,
+      "download_command": "python -c 'from sentence_transformers import SentenceTransformer; SentenceTransformer(\"all-MiniLM-L6-v2\")'"
+    },
+    "mistral-7b-instruct-v0.2.Q4_K_M.gguf": {
+      "description": "Mistral 7B Instruct - Local LLM for NL2Cypher (optional)",
+      "version": "0.2",
+      "size_mb": 4370,
+      "sha256": "PLACEHOLDER_HASH_TO_BE_COMPUTED_ON_DOWNLOAD",
+      "source": "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
+      "license": "Apache-2.0",
+      "required": false,
+      "download_command": "huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+    },
+    "tesseract-data": {
+      "description": "Tesseract OCR language data (eng, hin, ara)",
+      "version": "4.1.0",
+      "size_mb": 50,
+      "sha256": "COMPUTED_FROM_TESSDATA_FILES",
+      "source": "https://github.com/tesseract-ocr/tessdata",
+      "license": "Apache-2.0",
+      "required": true,
+      "download_command": "wget https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata && wget https://github.com/tesseract-ocr/tessdata/raw/main/hin.traineddata"
+    }
+  },
+  "total_size_required_mb": 269.5,
+  "total_size_with_optional_mb": 4639.5,
+  "verification_instructions": "Run: python infra/scripts/verify_models.py",
+  "download_all_command": "bash infra/scripts/download_models.sh"
+}

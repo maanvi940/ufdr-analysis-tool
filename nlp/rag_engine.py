@@ -8,13 +8,12 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import llama_cpp
-from sentence_transformers import SentenceTransformer
 
 # Import our vector retriever
 import sys

@@ -1,0 +1,28 @@
+{
+  "ingestion_id": "ea2ce9e0-7b4d-496b-a1a3-fe1ec89f2fd3",
+  "source_path": "data\\test_file.json",
+  "source_type": "file",
+  "total_files": 1,
+  "total_size_bytes": 330,
+  "created_at": "2025-10-02T16:28:07.368487Z",
+  "workspace_path": "data\\ingestion_workspace\\ea2ce9e0-7b4d-496b-a1a3-fe1ec89f2fd3",
+  "files": [
+    {
+      "file_id": "c887b53c-d387-46ee-a530-724276c3ed9f",
+      "original_path": "data\\test_file.json",
+      "extracted_path": "data\\ingestion_workspace\\ea2ce9e0-7b4d-496b-a1a3-fe1ec89f2fd3\\test_file.json",
+      "filename": "test_file.json",
+      "file_size": 330,
+      "mime_type": "text/plain",
+      "extension": ".json",
+      "sha256_hash": "ae14738929a6880735ee4118d40e87054089b4b109b32aabb88e624d4b486ed5",
+      "byte_offset": 0,
+      "timestamp": "2025-10-02T16:28:07.368487Z",
+      "parent_archive": null,
+      "metadata": {}
+    }
+  ],
+  "metadata": {
+    "source_type": "single_file"
+  }
+}

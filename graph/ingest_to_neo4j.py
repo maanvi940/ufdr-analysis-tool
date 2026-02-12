@@ -7,8 +7,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+from typing import Dict
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
 import os

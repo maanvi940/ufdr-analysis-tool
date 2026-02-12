@@ -1,7 +1,12 @@
+# ============================================================================
 # Python
+# ============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
 *.so
 .Python
 build/
@@ -21,31 +26,37 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-*.pyc
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Virtual Environment
+# ============================================================================
+# Virtual Environments
+# ============================================================================
 venv/
 ENV/
 env/
-.venv
+.venv/
+.virtualenv/
+virtualenv/
 
-# IDEs
+# ============================================================================
+# IDEs and Editors
+# ============================================================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-project
+*.sublime-workspace
 
-# Project specific
-data/raw/
-data/parsed/
-data/*.json
-data/*.db
-*.ufdr
-*.zip
-
-# Sensitive data
+# ============================================================================
+# Environment Variables and Sensitive Data
+# ============================================================================
+.env
+.env.local
+.env.*.local
 *.key
 *.pem
 *.cert
@@ -54,52 +65,140 @@ secrets/
 credentials/
 ingest_manifest.json
 
-# Models (too large for git)
-infra/models/embeddings/*
-infra/models/llm/*
-!infra/models/embeddings/.gitkeep
-!infra/models/llm/.gitkeep
+# Keep example environment file
+!.env.example
+!.env.template
 
-# Indexes and databases
-*.faiss
-*.index
-neo4j/data/
+# ============================================================================
+# Databases (exclude all except test databases)
+# ============================================================================
 *.db
 *.sqlite
+*.sqlite3
+neo4j/data/
 
-# Logs
+# Include test databases
+!test_data/*.db
+!ingest/data/test_*.db
+!ingest/data/test_e2e_mvp.db
+!ingest/data/test_mvp.db
+!ingest/data/test_direct.db
+!data/forensics_test.db
+
+# ============================================================================
+# Logs and Temporary Files
+# ============================================================================
 *.log
 logs/
+temp/
+tmp/
 audit_logs/
+data/audit_logs/
 
-# Media files
+# ============================================================================
+# Generated Outputs and Exports
+# ============================================================================
+exports/
+output/
+data/parsed/
+data/raw/
+data/temp_uploads/
+data/canonical/
+uploads/ufdr_extractions/
+frontend/uploads/ufdr_extractions/
+
+# ============================================================================
+# Large Model Files (too large for git)
+# ============================================================================
+infra/models/embeddings/*
+infra/models/llm/*
+infra/models/vision/*.pt
+*.gguf
+*.bin
+*.safetensors
+yolov8*.pt
+
+# Keep model directory structure and manifest
+!infra/models/embeddings/.gitkeep
+!infra/models/llm/.gitkeep
+!infra/models/vision/.gitkeep
+!infra/models/MODEL_MANIFEST.json
+
+# ============================================================================
+# Vector Indices and FAISS
+# ============================================================================
+*.faiss
+*.index
+*.pkl
+data/indices/
+data/vector_db/
+data/vector_index/
+
+# ============================================================================
+# Media Files (exclude large media, keep test samples)
+# ============================================================================
 *.mp4
 *.mp3
 *.wav
-*.jpg
-*.jpeg
-*.png
-*.pdf
-!docs/*.pdf
+*.avi
+*.mov
+*.mkv
+*.m4a
+*.aac
+*.heic
+data/media_enhancements/
+data/media_reports/
 
+# Keep test media and documentation images
+!test_data/**/*.mp4
+!test_data/**/*.mp3
+!test_data/**/*.wav
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.jpeg
+!docs/**/*.gif
+
+# ============================================================================
+# UFDR Files and Archives
+# ============================================================================
+*.ufdr
+*.zip
+archives/manifests/
+
+# Keep test UFDR files
+!test_data/*.ufdr
+!test_data/**/*.ufdr
+
+# ============================================================================
 # Docker
+# ============================================================================
 .dockerignore
 
+# ============================================================================
 # Backups
+# ============================================================================
 *.bak
 *.backup
+*.old
 infra/backups/*
 !infra/backups/.gitkeep
 
-# Monitoring
+# ============================================================================
+# Monitoring and Metrics
+# ============================================================================
 prometheus_data/
 grafana_data/
 
+# ============================================================================
 # Cache
+# ============================================================================
 .cache/
 *.cache
+data/cache/
 
-# Test coverage
+# ============================================================================
+# Test Coverage and Testing
+# ============================================================================
 htmlcov/
 .coverage
 .coverage.*
@@ -107,16 +206,33 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.tox/
+nosetests.xml
+test-results/
 
+# ============================================================================
 # Jupyter Notebooks
+# ============================================================================
 .ipynb_checkpoints
 *.ipynb
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Offline bundle (too large)
+# ============================================================================
+# Offline Bundle (too large)
+# ============================================================================
 infra/offline_bundle/*
 !infra/offline_bundle/README.md
+
+# ============================================================================
+# Documentation (keep all documentation)
+# ============================================================================
+# All documentation files are included by default
+
+# ============================================================================
+# Requirements Files (keep all)
+# ============================================================================
+# All requirements*.txt files are included by default
+
+# ============================================================================
+# Test Data (keep test data directory)
+# ============================================================================
+# test_data/ directory is included by default

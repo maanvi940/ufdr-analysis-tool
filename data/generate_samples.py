@@ -9,7 +9,6 @@ import random
 import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
-import hashlib
 from faker import Faker
 
 fake = Faker(['en_IN', 'hi_IN'])

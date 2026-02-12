@@ -1,0 +1,457 @@
+/**
+ * UFDR Analysis Tool - Premium Dark Theme
+ * OLED-Friendly Professional Interface
+ * 
+ * Design Philosophy:
+ * - Deep OLED Black/Slate backgrounds for eye comfort
+ * - High contrast Neon Blue/Orange accents
+ * - Glassmorphism with subtle borders
+ * - Smooth, high-frame-rate animations
+ * - Data-dense but breathable layout
+ */
+
+/* ========================================
+   IMPORTS & FONTS
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+/* ========================================
+   CSS VARIABLES - DESIGN TOKENS
+   ======================================== */
+:root {
+    /* Primary Colors - Electric Blue */
+    --primary-50: #eff6ff;
+    --primary-100: #dbeafe;
+    --primary-200: #bfdbfe;
+    --primary-300: #93c5fd;
+    --primary-400: #60a5fa;
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --primary-700: #1d4ed8;
+    --primary-glow: rgba(37, 99, 235, 0.5);
+
+    /* Secondary Colors - Cyan/Teal */
+    --secondary-500: #06b6d4;
+    --secondary-glow: rgba(6, 182, 212, 0.5);
+
+    /* Accent Colors */
+    --accent-orange: #f97316;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-yellow: #f59e0b;
+
+    /* Dark Mode Canvas Colors (OLED Optimized) */
+    --bg-canvas: #020617;
+    /* Slate 950 */
+    --bg-card: #0f172a;
+    /* Slate 900 */
+    --bg-card-hover: #1e293b;
+    /* Slate 800 */
+    --bg-surface: #1e293b;
+
+    /* Text Colors */
+    --text-primary: #f8fafc;
+    /* Slate 50 */
+    --text-secondary: #cbd5e1;
+    /* Slate 300 */
+    --text-tertiary: #94a3b8;
+    /* Slate 400 */
+    --text-muted: #64748b;
+    /* Slate 500 */
+
+    /* Borders */
+    --border-subtle: #1e293b;
+    --border-light: #334155;
+    --border-focus: #3b82f6;
+
+    /* Shadows & Glows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --shadow-neon: 0 0 15px var(--primary-glow);
+    --shadow-neon-secondary: 0 0 15px var(--secondary-glow);
+
+    /* Spacing & Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+
+    /* Fonts */
+    --font-display: 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ========================================
+   GLOBAL RESET
+   ======================================== */
+body {
+    background-color: var(--bg-canvas) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* Streamlit Main Container */
+.main {
+    background-color: var(--bg-canvas) !important;
+}
+
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1400px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-surface);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-600);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 5px var(--primary-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--primary-glow), 0 0 10px var(--primary-500);
+    }
+
+    100% {
+        box-shadow: 0 0 5px var(--primary-glow);
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* ========================================
+   SIDEBAR
+   ======================================== */
+[data-testid="stSidebar"] {
+    background-color: var(--bg-card) !important;
+    border-right: 1px solid var(--border-subtle) !important;
+}
+
+[data-testid="stSidebar"] hr {
+    border-color: var(--border-subtle) !important;
+}
+
+/* Sidebar Nav Items */
+[data-testid="stSidebar"] .row-widget.stRadio>div label {
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio>div label:hover {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    padding-left: 20px !important;
+    /* Slide effect */
+}
+
+[data-testid="stSidebar"] .row-widget.stRadio>div label[data-checked="true"] {
+    background: linear-gradient(90deg, var(--primary-900) 0%, var(--bg-card) 100%) !important;
+    border-left: 3px solid var(--primary-500) !important;
+    color: var(--primary-400) !important;
+    padding-left: 16px !important;
+}
+
+/* ========================================
+   COMPONENTS
+   ======================================== */
+
+/* Metric Cards */
+[data-testid="stMetric"] {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 1rem !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+[data-testid="stMetric"]:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-neon);
+    border-color: var(--primary-500) !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--text-tertiary) !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: var(--text-primary) !important;
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+}
+
+/* Buttons */
+.stButton>button {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3) !important;
+}
+
+.stButton>button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4), 0 0 15px var(--primary-500) !important;
+}
+
+.stButton>button:active {
+    transform: translateY(0);
+}
+
+/* Secondary Button */
+.stButton>button[kind="secondary"] {
+    background: transparent !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: none !important;
+}
+
+.stButton>button[kind="secondary"]:hover {
+    border-color: var(--text-primary) !important;
+    color: var(--text-primary) !important;
+    background: var(--bg-surface) !important;
+}
+
+/* Inputs */
+.stTextInput>div>div>input,
+.stTextArea>div>div>textarea,
+.stSelectbox>div>div {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.stTextInput>div>div>input:focus,
+.stTextArea>div>div>textarea:focus,
+.stSelectbox>div>div:focus-within {
+    border-color: var(--primary-500) !important;
+    box-shadow: 0 0 0 2px var(--primary-glow) !important;
+}
+
+/* DataFrames/Tables */
+[data-testid="stDataFrame"] {
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden !important;
+}
+
+[data-testid="stDataFrame"] table {
+    background-color: var(--bg-card) !important;
+}
+
+[data-testid="stDataFrame"] thead tr th {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+}
+
+[data-testid="stDataFrame"] tbody tr td {
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+/* ========================================
+   CUSTOM GLASS CARDS
+   ======================================== */
+.glass-card {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.6) 100%) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: var(--radius-xl) !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.glass-card:hover {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.1) !important;
+}
+
+.glass-header {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Hero Section */
+.hero-container {
+    background: radial-gradient(circle at top center, #1e1b4b 0%, #020617 70%);
+    padding: 4rem 2rem;
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-glow {
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(60px);
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    letter-spacing: -2px;
+}
+
+.hero-subtitle {
+    font-family: var(--font-body);
+    color: var(--text-tertiary);
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Loading Animation */
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.loader-ring {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--bg-surface);
+    border-top: 4px solid var(--primary-500);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-family: var(--font-mono);
+    color: var(--primary-400);
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Utility Classes */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-400), var(--accent-purple));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.badge {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary-400);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    display: inline-block;
+}
