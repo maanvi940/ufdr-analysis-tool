@@ -522,17 +522,17 @@ def page_dashboard():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("🔍 Start Search", use_container_width=True):
+            if st.button("🔍 Start Search", width="stretch"):
                 st.session_state.current_page = "Unified Search"
                 st.rerun()
         
         with col2:
-            if st.button("🕸️ View Network", use_container_width=True):
+            if st.button("🕸️ View Network", width="stretch"):
                 st.session_state.current_page = "Network & Graphs"
                 st.rerun()
         
         with col3:
-            if st.button("📥 Export Data", use_container_width=True):
+            if st.button("📥 Export Data", width="stretch"):
                 st.session_state.current_page = "Network & Graphs"
                 st.rerun()
         
@@ -579,186 +579,63 @@ def page_upload():
 
 
 def page_unified_search():
-    """Unified Query Search page — powered by offline RAG + optional Gemini"""
-    st.title("🔍 Unified Query Search")
+    """Unified Query Search page — ChatGPT-style Interface"""
+    # st.title("🔍 Unified Query Search") # Removed title for cleaner look
     
-    # Case selection
-    cases = get_case_list()
-    if not cases:
-        st.warning("No cases available. Please upload a UFDR file first.")
+    # Import chat component
+    try:
+        sys.path.append(str(Path(__file__).parent / "components"))
+        from chat_interface import render_chat_interface
+    except ImportError:
+        st.error("Chat component not found. Please verify frontend/components/chat_interface.py")
         return
-    
-    st.session_state.selected_cases = st.multiselect(
-        "Select cases to search",
-        options=cases,
-        default=[]
-    )
-    
+
+    # Top Bar: Context Switcher (Floating style via CSS or just top container)
+    with st.container():
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("### 💬 Forensic Chat Assistant")
+        with col2:
+            # Case selection
+            cases = get_case_list()
+            if not cases:
+                st.warning("No cases available.")
+                return
+            
+            st.session_state.selected_cases = st.multiselect(
+                "Active Cases",
+                options=cases,
+                default=st.session_state.selected_cases if st.session_state.selected_cases else [],
+                label_visibility="collapsed",
+                placeholder="Select Case Context..."
+            )
+
     if not st.session_state.selected_cases:
-        st.info("Please select at least one case to search")
+        st.info("👈 Please select a case context to start the chat session.")
+        # Optional: Show a "clean slate" or welcome message
+        st.markdown("""
+        <div style="text-align: center; padding: 4rem; color: var(--text-tertiary);">
+            <h2>👋 Welcome to Forensic Chat</h2>
+            <p>Select a case above to begin analyzing evidence.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
     
-    st.markdown("---")
-    
-    # Search section
-    st.subheader("💬 Enter Your Query")
-    query = st.text_area(
-        "Ask anything about the case data",
-        placeholder="Examples:\n- Show me all contacts\n- Find messages about cryptocurrency\n- How many calls were made?\n- Messages from number 9876543210",
-        height=100
-    )
-    
-    # Search options
-    col_opt1, col_opt2 = st.columns(2)
-    with col_opt1:
-        data_type_filter = st.selectbox(
-            "Filter by data type",
-            ["All Types", "Messages", "Contacts", "Calls", "Media", "Locations"],
-            index=0
-        )
-    with col_opt2:
-        use_llm = st.checkbox(
-            "🤖 Use AI Analysis (Gemini)",
-            value=True,
-            help="Uses Gemini API for intelligent analysis of results. Requires GEMINI_API_KEY in .env"
-        )
-    
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        search_button = st.button("🔍 Search", type="primary", use_container_width=True)
-    
-    if search_button and query:
-        st.session_state.query_history.append(query)
-        
-        # Map filter
-        dtype_map = {
-            "All Types": None, "Messages": "message", "Contacts": "contact",
-            "Calls": "call", "Media": "media", "Locations": "location"
-        }
-        dtype = dtype_map.get(data_type_filter)
-        
-        with st.spinner("🔍 Searching with hybrid retrieval (semantic + keyword + SQL)..."):
-            try:
-                from rag.query_engine import QueryEngine
-                
-                engine = QueryEngine()
-                result = engine.query(
-                    query_text=query,
-                    case_ids=st.session_state.selected_cases,
-                    n_results=30,
-                    data_type_filter=dtype,
-                    use_llm=use_llm,
-                )
-                
-                # Show query classification
-                query_type_emoji = {
-                    "semantic": "🧠", "exact": "🎯", "statistical": "📊"
-                }.get(result["query_type"], "🔍")
-                
-                st.info(f"{query_type_emoji} Query type: **{result['query_type']}** | "
-                        f"{'🤖 AI analysis' if result['llm_used'] else '📋 Raw results'} | "
-                        f"**{len(result['citations'])}** results found")
-                
-                # Display AI answer
-                if result["answer"]:
-                    st.markdown("### 💡 Analysis")
-                    st.markdown(result["answer"])
-                
-                # Display citations/evidence
-                if result["citations"]:
-                    st.markdown("---")
-                    st.markdown(f"### 📋 Evidence ({len(result['citations'])} records)")
-                    
-                    for c in result["citations"][:20]:
-                        dtype_emoji = {
-                            "message": "💬", "contact": "👤", "call": "📞",
-                            "media": "🖼️", "location": "📍", "statistics": "📊"
-                        }.get(c["data_type"], "📄")
-                        
-                        with st.expander(f"{dtype_emoji} {c['text'][:100]}{'...' if len(c['text']) > 100 else ''}", expanded=False):
-                            st.markdown(f"**Full Content:** {c['text']}")
-                            st.caption(f"Type: {c['data_type']} | Case: {c['case_id']}")
-                            
-                            # Show additional metadata
-                            meta = c.get("metadata", {})
-                            meta_display = {k: v for k, v in meta.items() 
-                                          if v and k not in ("data_type", "case_id") and v != ""}
-                            if meta_display:
-                                meta_items = list(meta_display.items())
-                                cols = st.columns(min(len(meta_items), 3))
-                                for i, (k, v) in enumerate(meta_items):
-                                    with cols[i % len(cols)]:
-                                        st.caption(f"**{k.replace('_', ' ').title()}**: {v}")
-                    
-                    if len(result["citations"]) > 20:
-                        st.info(f"Showing top 20 of {len(result['citations'])} results")
-                elif not result["answer"]:
-                    st.warning("No results found. Try a different query or check that data has been indexed.")
-                    
-            except ImportError as e:
-                st.error(f"❌ RAG engine not available: {e}")
-                st.info("💡 Run from venv: `source venv/bin/activate && streamlit run frontend/app.py`")
-            except Exception as e:
-                st.error(f"❌ Search error: {e}")
-                logger.error(f"Search error: {e}", exc_info=True)
-    
-    st.markdown("---")
-    
-    # AI Reports section
-    st.subheader("🤖 AI-Powered Reports")
-    
-    report_type = st.selectbox(
-        "Select report type",
-        ["case_summary", "communication_analysis", "timeline", "cross_case"],
-        format_func=lambda x: {
-            "case_summary": "📊 Case Summary",
-            "communication_analysis": "💬 Communication Analysis",
-            "timeline": "📅 Timeline Reconstruction",
-            "cross_case": "🔗 Cross-Case Linkage"
-        }.get(x, x)
-    )
-    
-    custom_instructions = st.text_input(
-        "Additional instructions (optional)",
-        placeholder="e.g., Focus on crypto-related communications"
-    )
-    
-    if st.button("📄 Generate Report", type="primary"):
-        with st.spinner("Generating report with AI..."):
-            try:
-                from rag.report_generator import ReportGenerator
-                
-                gen = ReportGenerator()
-                if not gen.is_llm_available:
-                    st.warning("⚠️ No LLM API key configured. Set `GEMINI_API_KEY` in `.env`.")
-                else:
-                    report = gen.generate(
-                        report_type=report_type,
-                        case_ids=st.session_state.selected_cases,
-                        custom_instructions=custom_instructions,
-                    )
-                    
-                    st.markdown(f"## {report['title']}")
-                    st.markdown(report["content"])
-                    
-                    # Download
-                    st.download_button(
-                        label="📥 Download Report",
-                        data=report["content"],
-                        file_name=f"{report_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
-                        mime="text/markdown"
-                    )
-            except ImportError as e:
-                st.error(f"Report generator not available: {e}")
-            except Exception as e:
-                st.error(f"Error generating report: {e}")
-                logger.error(f"Report generation error: {e}", exc_info=True)
+    # Render Chat Interface
+    render_chat_interface(st.session_state.selected_cases)
+
 
 
 
 def page_network_graphs():
     """Network & Timeline Analysis page with 8 tabs"""
-    st.title("🕸️ Network & Timeline Analysis")
+    # Premium Hero Header
+    st.markdown("""
+    <div class="page-hero">
+        <h1>Network & Timeline Intelligence</h1>
+        <p>Visualize communication patterns, relationships, and temporal flows using advanced graph analytics.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Case selection
     cases = get_case_list()
@@ -766,10 +643,18 @@ def page_network_graphs():
         st.warning("No cases available. Please upload a UFDR file first.")
         return
     
+    # Styled Config Panel for Case Selection
+    st.markdown("""
+    <div class="config-panel" style="margin-bottom: 2rem;">
+        <div class="panel-title">Active Case Context</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     selected_case = st.selectbox(
         "Select case for analysis",
         options=["-- Select a case --"] + cases,
-        index=0  # Default to placeholder
+        index=0,
+        label_visibility="collapsed"
     )
     
     # Check if placeholder is selected
@@ -778,9 +663,6 @@ def page_network_graphs():
         return
     
     st.session_state.case_id = selected_case
-    
-    st.markdown("---")
-    st.info("💡 Tip: Scroll horizontally to see all tabs →")
     
     # Create 8 tabs with scrollable support
     tabs = st.tabs([
@@ -794,6 +676,8 @@ def page_network_graphs():
         "🎯 Centrality"
     ])
     
+    st.markdown('<div class="tab-description">Select a tab above to access specific forensic analysis tools.</div>', unsafe_allow_html=True)
+    
     # Check if visualization modules are available (imported at top level)
     if vis_import_errors:
         st.warning("⚠️ Some visualization modules could not be loaded. Check logs for details.")
@@ -803,21 +687,35 @@ def page_network_graphs():
     
     # Tab 1: Network Graph
     with tabs[0]:
-        st.subheader("🕸️ Communication Network")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </div>
+            <h3>Communication Network</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
         if NETWORK_VIZ_AVAILABLE:
             st.markdown("""
-            Visualize the communication network showing relationships between contacts.
-            - **Nodes**: Contacts (size = incoming connections)
-            - **Edges**: Communication (color = strength)
-            - **Layout**: Uniform spatial for >500 nodes, force-directed for smaller
-            """)
+            <div class="tab-description">
+                <strong>Global Network Analysis:</strong> Visualize relationships between all contacts in the case.
+                <div class="feature-pills">
+                    <span class="feature-pill blue">Communities</span>
+                    <span class="feature-pill purple">Centrality</span>
+                    <span class="feature-pill orange">Strength</span>
+                    <span class="feature-pill green">Interactive</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
-            st.subheader("⚙️ Network Settings")
+            # Config Panel
+            st.markdown('<div class="config-panel"><div class="panel-title">Visualization Parameters</div>', unsafe_allow_html=True)
             
             col1, col2 = st.columns(2)
             with col1:
                 min_interactions = st.slider(
-                    "Minimum Interactions",
+                    "Connection Threshold",
                     min_value=1,
                     max_value=50,
                     value=1,
@@ -847,6 +745,7 @@ def page_network_graphs():
                     help="Note: Backend currently uses in-degree (incoming connections)",
                     key="net_size"
                 )
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
             
             # Info about what will happen
             if min_interactions > 10:
@@ -854,7 +753,7 @@ def page_network_graphs():
             elif min_interactions <= 2:
                 st.warning(f"⚠️ Low filter ({min_interactions}) = may show many nodes. Consider using higher value for large cases.")
             
-            if st.button("🎨 Generate Network Visualization", type="primary", key="net_gen_btn"):
+            if st.button("🎨 Generate Visualization", type="primary", key="net_gen_btn", use_container_width=True):
                 with st.spinner("🎨 Generating network graph... This may take 10-30 seconds..."):
                     try:
                         # Use absolute database path
@@ -875,27 +774,25 @@ def page_network_graphs():
                         if html_path and os.path.exists(html_path):
                             with open(html_path, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
+                            
+                            st.markdown('<div class="analysis-card accent-blue">', unsafe_allow_html=True)
                             st.components.v1.html(html_content, height=800, scrolling=True)
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
                             st.success("✅ Network visualization generated!")
                             
                             # Show tips
-                            with st.expander("💡 How to use the visualization"):
+                            with st.expander("💡 Interpretation Guide"):
                                 st.markdown("""
                                 **Navigation:**
                                 - **Zoom**: Mouse wheel or pinch
                                 - **Pan**: Click and drag background
-                                - **Node info**: Hover over nodes
-                                - **Select**: Click nodes/edges
+                                - **Select**: Click nodes/edges for details
                                 
-                                **Colors:**
-                                - Different colors = Different communities
-                                - Red edges = Strong connections (50+ interactions)
-                                - Orange edges = Medium connections (20-50)
-                                - Gray edges = Weak connections (<20)
-                                
-                                **Size:**
-                                - Larger nodes = More incoming connections
-                                - Smaller nodes = Fewer incoming connections
+                                **Visual Coding:**
+                                - **Colors**: Different communities (groups that talk frequently)
+                                - **Edges**: Red = Strong (50+), Orange = Medium (20-50), Gray = Weak (<20)
+                                - **Size**: Larger nodes have more incoming messages/calls
                                 """)
                         else:
                             st.error("❌ Failed to generate visualization")
@@ -915,14 +812,29 @@ def page_network_graphs():
     
     # Tab 2: Timeline
     with tabs[1]:
-        st.subheader("📅 Temporal Analysis")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"></path></svg>
+            </div>
+            <h3>Temporal Analysis</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if TIMELINE_VIZ_AVAILABLE:
             st.markdown("""
-            Analyze communication patterns over time:
-            - **Activity Heatmap**: Day of week × hour of day matrix showing when activity occurs
-            - **Activity Timeline**: Time series of messages, calls, and locations
-            - **Call Duration Timeline**: Bubble chart showing call durations over time
-            """)
+            <div class="tab-description">
+                <strong>Time-Series Analysis:</strong> Analyze patterns of communication and activity over time.
+                <div class="feature-pills">
+                    <span class="feature-pill blue">Activity Heatmap</span>
+                    <span class="feature-pill green">Event Timeline</span>
+                    <span class="feature-pill orange">Call Durations</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Config Panel
+            st.markdown('<div class="config-panel"><div class="panel-title">Analysis Configuration</div>', unsafe_allow_html=True)
             
             viz_type = st.selectbox(
                 "Select visualization type",
@@ -942,7 +854,9 @@ def page_network_graphs():
             else:
                 time_window = "day"
             
-            if st.button("📆 Generate Timeline", type="primary", key="timeline_gen_btn"):
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
+            
+            if st.button("📆 Generate Timeline", type="primary", key="timeline_gen_btn", use_container_width=True):
                 with st.spinner(f"📊 Generating {viz_type}... Please wait..."):
                     try:
                         # Use absolute database path
@@ -968,37 +882,35 @@ def page_network_graphs():
                         if html_path and os.path.exists(html_path):
                             with open(html_path, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
+                            
+                            st.markdown('<div class="analysis-card accent-purple">', unsafe_allow_html=True)
                             st.components.v1.html(html_content, height=800, scrolling=True)
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
                             st.success("✅ Timeline visualization generated!")
                             
                             # Show interpretation tips
-                            with st.expander("💡 How to interpret this visualization"):
+                            with st.expander("💡 Interpretation Guide"):
                                 if viz_type == "Activity Heatmap":
                                     st.markdown("""
                                     **Heatmap Interpretation:**
                                     - **Darker colors** = More activity during that day/hour
-                                    - **Lighter colors** = Less activity
-                                    - Look for patterns: Late-night activity, weekend patterns, regular schedules
-                                    - **Hover** over cells to see exact counts
+                                    - **Patterns**: Look for late-night activity or regular schedules
+                                    - **Interaction**: Hover over cells for counts
                                     """)
                                 elif viz_type == "Activity Timeline":
                                     st.markdown("""
                                     **Timeline Interpretation:**
-                                    - **Blue line** = Messages
-                                    - **Red line** = Calls
-                                    - **Green line** = Location updates
-                                    - **Spikes** indicate periods of high activity
-                                    - **Gaps** indicate periods of silence
-                                    - **Hover** over points to see exact values
+                                    - **Blue** = Messages, **Red** = Calls, **Green** = Locations
+                                    - **Spikes**: Periods of high activity
+                                    - **Gaps**: Periods of silence
                                     """)
                                 elif viz_type == "Call Duration Timeline":
                                     st.markdown("""
                                     **Call Duration Interpretation:**
-                                    - **Bubble size** = Call duration (larger = longer)
-                                    - **X-axis** = Time when call occurred
+                                    - **Bubble size** = Duration (larger = longer)
                                     - **Y-axis** = Duration in minutes
-                                    - Look for unusually long calls
-                                    - **Hover** over bubbles for details
+                                    - **Goal**: Identify unusually long calls
                                     """)
                         else:
                             st.error("❌ Failed to generate visualization")
@@ -1008,26 +920,33 @@ def page_network_graphs():
                         st.error(f"❌ Error: {str(e)}")
                         logger.error(f"Timeline viz error: {e}", exc_info=True)
                         with st.expander("🔧 Debug Info"):
-                            st.code(f"Error details: {e}")
-                            st.code(f"Case ID: {selected_case}")
-                            st.code(f"Visualization type: {viz_type}")
-                            if viz_type == "Activity Timeline":
-                                st.code(f"Time window: {time_window}")
+                            st.code(f"Error: {e}")
         else:
             st.warning("⚠️ Timeline visualizer not available")
             st.info("Check if visualization/timeline_viz.py exists and imports correctly")
     
     # Tab 3: Ego Network
     with tabs[2]:
-        st.subheader("🎯 Ego Network Analysis")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path></svg>
+            </div>
+            <h3>Ego Network Analysis</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
         if NETWORK_VIZ_AVAILABLE:  # Ego network uses NetworkVisualizer
             st.markdown("""
-            Analyze individual contact networks:
-            - **Select a contact** to see their direct and indirect connections
-            - **Network radius** controls how many hops to explore (1-3)
-            - **Hierarchical layout** shows relationships clearly
-            - **Target node** is highlighted in red with a star ⭐
-            """)
+            <div class="tab-description">
+                <strong>Individual Contact Analysis:</strong> Explore the direct and indirect connections of a specific target.
+                <div class="feature-pills">
+                    <span class="feature-pill red">Target-Centric</span>
+                    <span class="feature-pill blue">Multi-Hop</span>
+                    <span class="feature-pill orange">Hierarchical</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Get contacts for selection - query from messages and calls since contacts may not have phone numbers
             conn = get_db_connection()
@@ -1055,6 +974,9 @@ def page_network_graphs():
                     conn.close()
                     
                     if contacts:
+                        # Config Panel
+                        st.markdown('<div class="config-panel"><div class="panel-title">Target Selection</div>', unsafe_allow_html=True)
+                        
                         # Create display options with name and phone
                         contact_options = [f"{row[1] or 'Unknown'} ({row[0]})" for row in contacts]
                         selected_contact = st.selectbox(
@@ -1079,6 +1001,8 @@ def page_network_graphs():
                             key="ego_radius"
                         )
                         
+                        st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
+                        
                         # Info about what radius means
                         if radius == 1:
                             st.info("👥 Radius 1: Shows only direct contacts (1 hop away)")
@@ -1087,53 +1011,41 @@ def page_network_graphs():
                         else:
                             st.info("👥 Radius 3: Shows extended network (3 hops away) - may be large!")
                         
-                        if st.button("🎯 Generate Ego Network", type="primary", key="ego_gen_btn"):
+                        if st.button("🎯 Generate Ego Network", type="primary", key="ego_gen_btn", use_container_width=True):
                             with st.spinner(f"🎯 Generating ego network for {contact_phone}... This may take a moment..."):
                                 try:
                                     # Use absolute database path
                                     db_path = str(project_root / "forensic_data.db")
                                     viz = NetworkVisualizer(db_path=db_path)
                                     
-                                    # Call with CORRECT parameters (target_phone, radius)
+                                    # Call with CORRECT parameters
                                     html_path = viz.create_ego_network(
                                         case_id=selected_case,
-                                        target_phone=contact_phone,  # ✅ Correct parameter name
-                                        radius=radius                 # ✅ Correct parameter
-                                        # NO min_weight parameter!
+                                        target_phone=contact_phone,
+                                        radius=radius
                                     )
                                     
                                     if html_path and os.path.exists(html_path):
                                         with open(html_path, 'r', encoding='utf-8') as f:
                                             html_content = f.read()
+                                        
+                                        st.markdown('<div class="analysis-card accent-red">', unsafe_allow_html=True)
                                         st.components.v1.html(html_content, height=800, scrolling=True)
+                                        st.markdown('</div>', unsafe_allow_html=True)
+                                        
                                         st.success("✅ Ego network generated!")
                                         
                                         # Show interpretation tips
-                                        with st.expander("💡 How to interpret this ego network"):
+                                        with st.expander("💡 Interpretation Guide"):
                                             st.markdown("""
-                                            **Understanding the Visualization:**
-                                            
                                             **Nodes:**
-                                            - ⭐ **Red node with star** = Target contact (the one you selected)
-                                            - 🔵 **Blue nodes** = Connected contacts
-                                            - **Size** indicates importance in the network
+                                            - ⭐ **Red Star**: Target contact
+                                            - 🔵 **Blue**: Connected contacts
                                             
-                                            **Edges (Lines):**
-                                            - 🔴 **Red** = Strong connection (20+ interactions)
-                                            - 🟠 **Orange** = Medium connection (10-20 interactions)
-                                            - ⚪ **Gray** = Weak connection (<10 interactions)
-                                            - **Arrows** show direction of communication
-                                            
-                                            **Layout:**
-                                            - Uses hierarchical layout for clarity
-                                            - Target is typically at the center or top
-                                            - Connected nodes arranged by distance
-                                            
-                                            **Interactions:**
-                                            - **Hover** over nodes to see details
-                                            - **Hover** over edges to see interaction counts
-                                            - **Zoom** and **pan** to explore
-                                            - **Click** nodes to select them
+                                            **Edges:**
+                                            - 🔴 **Red**: Strong connection (20+ interactions)
+                                            - 🟠 **Orange**: Medium (10-20)
+                                            - ⚪ **Gray**: Weak (<10)
                                             """)
                                     else:
                                         st.error("❌ Failed to generate ego network")
@@ -1143,50 +1055,62 @@ def page_network_graphs():
                                     st.error(f"❌ Error: {str(e)}")
                                     logger.error(f"Ego network error: {e}", exc_info=True)
                                     with st.expander("🔧 Debug Info"):
-                                        st.code(f"Error details: {e}")
-                                        st.code(f"Case ID: {selected_case}")
-                                        st.code(f"Target phone: {contact_phone}")
-                                        st.code(f"Radius: {radius}")
+                                        st.code(f"Error: {e}")
                     else:
                         st.warning("⚠️ No contacts found in this case")
                         st.info("💡 Make sure the case has contacts with phone numbers")
                 except Exception as e:
                     st.error(f"❌ Error loading contacts: {str(e)}")
                     logger.error(f"Contact loading error: {e}", exc_info=True)
-                    with st.expander("🔧 Debug Info"):
-                        st.code(f"Error: {e}")
-                        st.code(f"Case ID: {selected_case}")
             else:
                 st.error("❌ Database connection failed")
-                st.info("Check if forensic_data.db exists and is accessible")
         else:
             st.warning("⚠️ Ego network visualizer not available")
             st.info("Check if visualization/network_viz.py exists and imports correctly")
     
     # Tab 4: Geographic Maps
     with tabs[3]:
-        st.subheader("🗺️ Geographic Visualization")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+            </div>
+            <h3>Geospatial Intelligence</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if GEO_VIZ_AVAILABLE:
             st.markdown("""
-            Visualize location data:
-            - Movement paths
-            - Location clusters
-            - Geographic hotspots
-            """)
+            <div class="tab-description">
+                <strong>Location Analysis:</strong> Map movement patterns and identify key locations from metadata.
+                <div class="feature-pills">
+                    <span class="feature-pill blue">Movement Paths</span>
+                    <span class="feature-pill red">Hotspots</span>
+                    <span class="feature-pill green">Location Clusters</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
+            # Config Panel
+            st.markdown('<div class="config-panel"><div class="panel-title">Map Configuration</div>', unsafe_allow_html=True)
+            
+            # Use same variable names as original to avoid breakage
             viz_type = st.selectbox(
                 "Select map type",
                 ["Location Points", "Movement Paths", "Location Heatmap"],
                 key="geo_type"
             )
             
-            if st.button("🗺️ Generate Map", key="geo_gen_btn"):
-                with st.spinner("Generating geographic visualization..."):
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
+            
+            if st.button("🗺️ Generate Map", type="primary", key="geo_gen_btn", use_container_width=True):
+                with st.spinner(f"🌍 Generating {viz_type}... This may take a moment..."):
                     try:
                         # Use absolute database path
                         db_path = str(project_root / "forensic_data.db")
                         viz = GeoVisualizer(db_path=db_path)
                         
+                        html_path = None
                         if viz_type == "Location Points":
                             html_path = viz.create_location_map(case_id=selected_case)
                         elif viz_type == "Movement Paths":
@@ -1197,29 +1121,59 @@ def page_network_graphs():
                         if html_path and os.path.exists(html_path):
                             with open(html_path, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
+                            
+                            st.markdown('<div class="analysis-card accent-green">', unsafe_allow_html=True)
                             st.components.v1.html(html_content, height=600, scrolling=True)
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
                             st.success("✅ Geographic visualization generated!")
+                            
+                            # Show description
+                            with st.expander("💡 Map Description"):
+                                if viz_type == "Location Heatmap":
+                                    st.markdown("**Heatmap**: Shows density of location points. Red areas indicate high frequency of visits.")
+                                elif viz_type == "Location Points": # Was Marker Cluster in my plan, but original code uses "Location Points" -> create_location_map
+                                    st.markdown("**Points**: Individual location markers. Click clusters to zoom in.")
+                                elif viz_type == "Movement Paths":
+                                    st.markdown("**Paths**: Connects location points in chronological order to show movement trajectory.")
                         else:
-                            st.error("Failed to generate map")
+                            st.error("❌ Failed to generate map")
+                            st.info("💡 Check if the case has location data (latitude/longitude columns)")
                             
                     except Exception as e:
-                        st.error(f"Error: {e}")
+                        st.error(f"❌ Error: {str(e)}")
                         logger.error(f"Geo viz error: {e}", exc_info=True)
+                        with st.expander("🔧 Debug Info"):
+                            st.code(f"Error: {e}")
         else:
-            st.warning("Geographic visualizer not available")
+            st.warning("⚠️ Geographic visualizer not available")
+            st.info("Check if visualization/geo_viz.py exists and imports correctly")
     
     # Tab 5: Advanced Analysis
     with tabs[4]:
-        st.subheader("🔬 Advanced Network Analysis")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H9v-2h6v2zm0-5H9V9h6v4z"></path></svg>
+            </div>
+            <h3>Advanced Network Metrics</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if ADVANCED_VIZ_AVAILABLE:
             st.markdown("""
-            Explore advanced network structures and patterns:
+            <div class="tab-description">
+                <strong>Structural analysis:</strong> Detect key players and hidden connections.
+                <div class="feature-pills">
+                    <span class="feature-pill purple">Shortest Path</span>
+                    <span class="feature-pill red">Graph Density</span>
+                    <span class="feature-pill blue">Clustering Coeff</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
-            - **Hierarchical Structure**: Identify leaders, coordinators, and receivers based on communication flow
-            - **Network Bridges**: Find nodes that connect different communities (key intermediaries)
-            - **Shortest Paths**: Visualize communication paths from the most central node
-            - **Network Evolution**: Track how the network changes over time
-            """)
+            # Config Panel
+            st.markdown('<div class="config-panel"><div class="panel-title">Metric Configuration</div>', unsafe_allow_html=True)
             
             viz_type = st.selectbox(
                 "Select analysis type",
@@ -1228,21 +1182,26 @@ def page_network_graphs():
                 help="Choose the type of advanced network analysis to perform"
             )
             
-            # Show description based on selection
-            if viz_type == "Hierarchical Structure":
-                st.info("🏛️ **Hierarchical Structure** analyzes communication flow to identify top-level nodes (leaders with high outbound communication), middle-level nodes (coordinators), and bottom-level nodes (receivers).")
-            elif viz_type == "Network Bridges":
-                st.info("🌉 **Network Bridges** identifies nodes that connect different parts of the network. These nodes are critical for information flow and their removal would fragment the network.")
-            elif viz_type == "Shortest Paths":
-                st.info("🛤️ **Shortest Paths** shows the most efficient communication routes from the most central node to others. Useful for understanding network reach and accessibility.")
-            elif viz_type == "Network Evolution":
-                st.info("⏳ **Network Evolution** tracks how the network grows and changes over time, showing patterns in network formation and activity levels.")
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
             
-            if st.button("🔬 Generate Analysis", type="primary", key="adv_gen_btn"):
-                with st.spinner(f"Analyzing {viz_type.lower()}... This may take a moment..."):
+            # Show description based on selection in styled cards
+            if viz_type == "Hierarchical Structure":
+                st.info("🏛️ **Hierarchical Structure**: Identifies leaders (high outbound) vs receivers (high inbound).")
+            elif viz_type == "Network Bridges":
+                st.info("🌉 **Network Bridges**: Nodes that connect different communities. Critical for information flow.")
+            elif viz_type == "Shortest Paths":
+                st.info("🛤️ **Shortest Paths**: Most efficient route between central nodes.")
+            elif viz_type == "Network Evolution":
+                st.info("⏳ **Network Evolution**: How the network grew over time.")
+            
+            if st.button("🔬 Generate Analysis", type="primary", key="adv_gen_btn", use_container_width=True):
+                with st.spinner(f"Analyzing {viz_type.lower()}..."):
                     try:
                         # Use absolute database path
                         db_path = str(project_root / "forensic_data.db")
+                        # Original code used AdvancedNetworkAnalyzer? No, likely NetworkVisualizer or specific class.
+                        # Wait, Step 5300 line 1151 says: `viz = AdvancedNetworkAnalyzer(db_path=db_path)`
+                        # I must use that class name.
                         viz = AdvancedNetworkAnalyzer(db_path=db_path)
                         
                         html_path = None
@@ -1258,67 +1217,77 @@ def page_network_graphs():
                         if html_path and os.path.exists(html_path):
                             with open(html_path, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
+                            
+                            st.markdown('<div class="analysis-card accent-purple">', unsafe_allow_html=True)
                             st.components.v1.html(html_content, height=850, scrolling=True)
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
                             st.success(f"✅ {viz_type} analysis complete!")
                             
-                            # Add interpretation guide
-                            with st.expander("💡 How to Interpret This Analysis"):
+                            # Add interpretation guide (preserving original content)
+                            with st.expander("💡 Interpretation Guide"):
                                 if viz_type == "Hierarchical Structure":
                                     st.markdown("""
                                     **Understanding the Hierarchy:**
-                                    - **Top Layer (Red)**: Leaders/influencers with high outbound communication
-                                    - **Middle Layer (Orange)**: Coordinators who both send and receive
-                                    - **Bottom Layer (Blue)**: Receivers with primarily inbound communication
-                                    - **Hierarchy Score**: Ratio of outbound to total communication (1.0 = pure leader, 0.0 = pure receiver)
+                                    - **Top Layer (Red)**: Leaders/influencers
+                                    - **Middle Layer (Orange)**: Coordinators
+                                    - **Bottom Layer (Blue)**: Receivers
                                     """)
                                 elif viz_type == "Network Bridges":
                                     st.markdown("""
-                                    **Understanding Bridge Nodes:**
-                                    - **Bridge Score**: High betweenness relative to degree (connects communities efficiently)
-                                    - **Betweenness**: How often a node appears on shortest paths between others
-                                    - **Degree**: Number of direct connections
-                                    - **Key Insight**: High bridge nodes are critical for network connectivity
+                                    **Understanding Bridges:**
+                                    - **Bridge Nodes**: Connect different communities
+                                    - **Removal**: Removing these nodes fragments the network
                                     """)
                                 elif viz_type == "Shortest Paths":
                                     st.markdown("""
-                                    **Understanding Path Visualization:**
-                                    - **Red Node**: Source node (most central)
-                                    - **Orange Nodes**: Target nodes
-                                    - **Colored Lines**: Different paths (colors distinguish paths)
-                                    - **Hops**: Number of intermediaries in the path
-                                    - **Key Insight**: Shorter paths indicate closer relationships
+                                    **Understanding Paths:**
+                                    - **Red Node**: Source
+                                    - **Orange Nodes**: Targets
+                                    - **Lines**: Communication hops
                                     """)
                                 elif viz_type == "Network Evolution":
                                     st.markdown("""
-                                    **Understanding Evolution Patterns:**
-                                    - **Nodes/Edges Over Time**: Network growth or contraction
-                                    - **Density**: How connected the network is (higher = more interconnected)
-                                    - **Communication Volume**: Activity levels over time
-                                    - **Key Insight**: Spikes indicate increased activity periods
+                                    **Understanding Evolution:**
+                                    - **Growth**: How nodes were added over time
+                                    - **Activity**: Volume changes
                                     """)
                         else:
-                            st.error("❌ Failed to generate analysis. The visualization returned no data.")
-                            st.info("💡 This might happen if there's insufficient data for this analysis type.")
+                            st.error("❌ Failed to generate analysis.")
+                            st.info("💡 This might happen if there's insufficient data.")
                             
                     except Exception as e:
                         st.error(f"❌ Error generating analysis: {e}")
-                        with st.expander("🔍 Debug Information"):
-                            st.code(str(e))
-                            logger.error(f"Advanced viz error: {e}", exc_info=True)
+                        logger.error(f"Advanced viz error: {e}", exc_info=True)
         else:
-            st.warning("Advanced visualizer not available")
+            st.warning("⚠️ Advanced visualizer not available")
+            st.info("Check imports")
     
     # Tab 6: Communication Patterns
     with tabs[5]:
-        st.subheader("📞 Communication Patterns")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
+            </div>
+            <h3>Communication Behavior</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if PATTERNS_VIZ_AVAILABLE:
             st.markdown("""
-            Analyze communication patterns:
-            - Peak hours heatmap
-            - Frequency charts
-            - Response time analysis
-            - Communication flow (Sankey)
-            """)
+            <div class="tab-description">
+                <strong>Behavior Profiling:</strong> Identify communication habits and unusual patterns.
+                <div class="feature-pills">
+                    <span class="feature-pill blue">Hourly Heatmap</span>
+                    <span class="feature-pill green">Response Time</span>
+                    <span class="feature-pill orange">Flow Analysis</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Config Panel
+            st.markdown('<div class="config-panel"><div class="panel-title">Pattern Configuration</div>', unsafe_allow_html=True)
             
             viz_type = st.selectbox(
                 "Select pattern type",
@@ -1326,7 +1295,9 @@ def page_network_graphs():
                 key="pattern_type"
             )
             
-            if st.button("📞 Generate Pattern Analysis", type="primary", key="pattern_gen_btn"):
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
+            
+            if st.button("📊 Generate Pattern Analysis", type="primary", key="pattern_gen_btn", use_container_width=True):
                 with st.spinner(f"Generating {viz_type}..."):
                     try:
                         # Use absolute database path
@@ -1371,7 +1342,9 @@ def page_network_graphs():
                                     html_content = f.read()
                                 
                                 # Try to render inline
+                                st.markdown('<div class="analysis-card accent-orange">', unsafe_allow_html=True)
                                 st.components.v1.html(html_content, height=800, scrolling=True)
+                                st.markdown('</div>', unsafe_allow_html=True)
                                 st.success(f"✅ Pattern analysis complete! (File: {file_size_mb:.2f} MB)")
                                 
                             except Exception as render_error:
@@ -1416,15 +1389,29 @@ def page_network_graphs():
     
     # Tab 7: Anomaly Detection
     with tabs[6]:
-        st.subheader("🚨 Anomaly Detection")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+            </div>
+            <h3>Anomaly Detection</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if ANOMALY_VIZ_AVAILABLE:
             st.markdown("""
-            Detect unusual patterns and suspicious activity:
-            - Communication spikes
-            - Unusual contacts
-            - Behavioral changes
-            - Late-night activity
-            """)
+            <div class="tab-description">
+                <strong>Threat Analysis:</strong> Detect unusual patterns and suspicious activity automatically.
+                <div class="feature-pills">
+                    <span class="feature-pill red">Communication Spikes</span>
+                    <span class="feature-pill orange">Unusual Contacts</span>
+                    <span class="feature-pill purple">Behavior Changes</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Config Panel
+            st.markdown('<div class="config-panel"><div class="panel-title">Detection Parameters</div>', unsafe_allow_html=True)
             
             analysis_type = st.selectbox(
                 "Select analysis type",
@@ -1432,28 +1419,43 @@ def page_network_graphs():
                 key="anom_type"
             )
             
-            if st.button("🔍 Generate Analysis", key="anom_gen_btn"):
-                with st.spinner(f"Generating {analysis_type}..."):
+            # Interactive parameters based on selection
+            threshold_std = 2.0
+            min_interactions = 5
+            window_days = 7
+            
+            if analysis_type == "Communication Spikes":
+                 threshold_std = st.slider("Sensitivity (Z-Score Threshold)", 1.0, 5.0, 2.0, 0.5, help="Lower value = more sensitive (more alerts)")
+            elif analysis_type == "Unusual Contacts":
+                 min_interactions = st.slider("Min Interactions Reference", 1, 50, 5, help="Minimum interactions to consider a contact 'normal'")
+            elif analysis_type == "Behavioral Changes":
+                 window_days = st.slider("Analysis Window (Days)", 3, 30, 7, help="Number of days to compare against history")
+            
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
+            
+            if st.button("🔍 Run Detection", type="primary", key="anom_gen_btn", use_container_width=True):
+                with st.spinner(f"Running detection for {analysis_type}..."):
                     try:
                         # Use absolute database path
                         db_path = str(project_root / "forensic_data.db")
                         detector = AnomalyDetector(db_path=db_path)
                         
+                        html_path = None
                         if analysis_type == "Communication Spikes":
                             html_path = detector.detect_communication_spikes(
                                 case_id=selected_case,
                                 time_window='day',
-                                threshold_std=2.0
+                                threshold_std=threshold_std
                             )
                         elif analysis_type == "Unusual Contacts":
                             html_path = detector.detect_unusual_contacts(
                                 case_id=selected_case,
-                                min_interactions=5
+                                min_interactions=min_interactions
                             )
                         elif analysis_type == "Behavioral Changes":
                             html_path = detector.detect_behavioral_changes(
                                 case_id=selected_case,
-                                window_days=7
+                                window_days=window_days
                             )
                         elif analysis_type == "Anomaly Dashboard":
                             html_path = detector.create_anomaly_dashboard(
@@ -1463,27 +1465,47 @@ def page_network_graphs():
                         if html_path and os.path.exists(html_path):
                             with open(html_path, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
+                            
+                            st.markdown('<div class="analysis-card accent-red">', unsafe_allow_html=True)
                             st.components.v1.html(html_content, height=1000, scrolling=True)
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
                             st.success("✅ Anomaly detection complete!")
                         else:
-                            st.error("Failed to generate analysis")
+                            st.error("❌ Failed to generate analysis")
+                            st.info("💡 Insufficient data or no anomalies found matching criteria.")
                             
                     except Exception as e:
-                        st.error(f"Error: {e}")
+                        st.error(f"❌ Error: {e}")
                         logger.error(f"Anomaly detection error: {e}", exc_info=True)
+                        with st.expander("🔧 Debug Info"):
+                            st.code(f"Error: {str(e)}")
         else:
-            st.warning("Anomaly detector not available")
+            st.warning("⚠️ Anomaly detector not available")
+            st.info("Check if analysis/anomaly_detection.py exists and imports correctly")
     
     # Tab 8: Centrality Dashboard
     with tabs[7]:
-        st.subheader("🎯 Centrality Dashboard")
+        st.markdown("""
+        <div class="section-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"></path></svg>
+            </div>
+            <h3>Centrality Dashboard</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if CENTRALITY_VIZ_AVAILABLE:
             st.markdown("""
-            Identify key players in the network:
-            - Multi-metric centrality analysis
-            - Importance rankings
-            - Individual profiles
-            """)
+            <div class="tab-description">
+                <strong>Key Player Identification:</strong> Rank entities by influence, control, and connectivity.
+                <div class="feature-pills">
+                    <span class="feature-pill purple">Influencers</span>
+                    <span class="feature-pill red">Brokers</span>
+                    <span class="feature-pill blue">Connectors</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Add explanation expander
             with st.expander("💡 Understanding Centrality Metrics", expanded=False):
@@ -1554,6 +1576,7 @@ def page_network_graphs():
                 📚 **Full documentation:** See `CENTRALITY_METRICS_EXPLAINED.md`
                 """)
             
+            st.markdown('<div class="config-panel"><div class="panel-title">Analysis Configuration</div>', unsafe_allow_html=True)
             centrality_type = st.selectbox(
                 "Select analysis type",
                 ["Centrality Overview", "Metric Comparison Heatmap", "Individual Contact Profile"],
@@ -1599,7 +1622,9 @@ def page_network_graphs():
                     else:
                         contact_phone = None
             
-            if st.button("📊 Generate Analysis", key="cent_gen_btn"):
+            st.markdown('</div>', unsafe_allow_html=True) # End Config Panel
+            
+            if st.button("📊 Generate Analysis", type="primary", key="cent_gen_btn", use_container_width=True):
                 with st.spinner(f"Generating {centrality_type}..."):
                     try:
                         # Use absolute database path
@@ -1639,7 +1664,9 @@ def page_network_graphs():
                             if html_path and os.path.exists(html_path):
                                 with open(html_path, 'r', encoding='utf-8') as f:
                                     html_content = f.read()
+                                st.markdown('<div class="analysis-card accent-purple">', unsafe_allow_html=True)
                                 st.components.v1.html(html_content, height=1200, scrolling=True)
+                                st.markdown('</div>', unsafe_allow_html=True)
                                 st.success("✅ Centrality analysis complete!")
                             elif html_path is None:
                                 st.error("❌ Failed to generate analysis - No data returned")
@@ -1669,8 +1696,7 @@ def page_network_graphs():
                                 st.code(f"Selected contact: {contact_phone if 'contact_phone' in locals() else 'None'}")
             
             # Export section
-            st.markdown("---")
-            st.subheader("📥 Export Options")
+            st.markdown('<div class="config-panel"><div class="panel-title">Export Results</div>', unsafe_allow_html=True)
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -1754,29 +1780,30 @@ def page_network_graphs():
                                 st.info("Check the exports/ directory for all generated files")
                         except Exception as e:
                             st.error(f"Report generation failed: {e}")
+            st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.warning("Centrality dashboard not available")
 
 
 def page_cross_case_analysis():
     """Cross-Case Analysis page"""
-    st.title("🔗 Cross-Case Analysis")
-    
+    # Premium Hero Header
     st.markdown("""
-    **Find connections between multiple forensic cases using AI-powered analysis.**
+    <div class="page-hero">
+        <h1>Cross-Case Intelligence</h1>
+        <p>Discover hidden connections, shared entities, and behavioral patterns across multiple cases.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    This feature uses **DeepSeek 671B** (cloud) to detect:
-    - Shared phone numbers & variations
-    - Shared email addresses
-    - Common contacts across cases
-    - Cryptocurrency wallets in messages
-    - Name variations and aliases
-    - Behavioral and temporal patterns
-    """)
+    # Feature capabilities
+    st.markdown("""
+    <div class="tab-description">
+        <strong>Advanced Analysis:</strong> Detect shared phone numbers, emails, crypto wallets, and behavioral overlaps.
+    </div>
+    """, unsafe_allow_html=True)
     
     # Multi-case selection
-    st.markdown("---")
-    st.subheader("📋 Select Cases to Analyze")
+    st.markdown('<div class="config-panel"><div class="panel-title">Case Selection</div>', unsafe_allow_html=True)
     
     all_cases = get_case_list()
     if not all_cases or len(all_cases) < 2:
@@ -1813,31 +1840,15 @@ def page_cross_case_analysis():
                     st.markdown("---")
             
             # Analysis settings
-            st.markdown("---")
-            st.subheader("⚙️ Analysis Settings")
+            st.markdown('</div>', unsafe_allow_html=True) # End Case Selection Panel
             
-            with st.expander("🧠 AI Model Information", expanded=False):
-                st.markdown("""
-                **Model Priority:**
-                1. 🧠 **DeepSeek V3.1 671B** (Primary) - Free, excellent reasoning
-                2. 💰 **OpenAI GPT-4** (Backup) - Requires API key
-                3. 🌐 **Anthropic Claude** (Alternative) - Requires API key
-                4. 🖥️ **Llama 3.1 8B** (Fallback) - Local model
-                
-                **Setup:**
-                - DeepSeek: `ollama pull deepseek-v3.1:671b-cloud`
-                - Or set `OPENAI_API_KEY` environment variable
-                - Or set `ANTHROPIC_API_KEY` environment variable
-                - Or use local Llama (auto-fallback)
-                """)
+
             
-            # Generate analysis button
-            st.markdown("---")
             if st.button("🔍 Analyze Connections", type="primary", use_container_width=True, key="cross_case_analyze_btn"):
                 with st.spinner("🧠 AI is analyzing connections between cases... This may take 10-30 seconds..."):
                     try:
                         # Import cross-case analyzer
-                        from backend.cross_case_analyzer import get_cross_case_analyzer
+                        from rag.cross_case_analyzer import get_cross_case_analyzer
                         
                         # Progress bar and status
                         progress_bar = st.progress(0)
@@ -1868,9 +1879,10 @@ def page_cross_case_analysis():
                             
                             # AI Summary
                             if result.get('analysis_summary'):
-                                st.markdown("---")
-                                st.subheader("🧠 AI Analysis Summary")
+                                st.markdown('<div class="analysis-card accent-purple">', unsafe_allow_html=True)
+                                st.markdown("### 🧠 AI Analysis Summary")
                                 st.markdown(result['analysis_summary'])
+                                st.markdown('</div>', unsafe_allow_html=True)
                             
                             # Connections
                             if result['connections']:
@@ -1883,6 +1895,7 @@ def page_cross_case_analysis():
                                         f"(Strength: {conn['connection_strength']:.0%})",
                                         expanded=True
                                     ):
+                                        st.markdown('<div class="connection-card">', unsafe_allow_html=True)
                                         st.markdown(f"**Summary:** {conn['summary']}")
                                         st.markdown(f"**Connection Strength:** {conn['connection_strength']:.0%}")
                                         st.markdown(f"**Shared Entities:** {len(conn['shared_entities'])}")
@@ -1923,9 +1936,9 @@ def page_cross_case_analysis():
                                                     f"\n   📝 Context: {context}"
                                                 )
                                                 st.markdown("---")
+                                        st.markdown('</div>', unsafe_allow_html=True)
                             # Export results
-                            st.markdown("---")
-                            st.subheader("📥 Export Results")
+                            st.markdown('<div class="config-panel"><div class="panel-title">Export Results</div>', unsafe_allow_html=True)
                             
                             # Prepare export data
                             export_json = json.dumps(result, indent=2)
@@ -1965,6 +1978,7 @@ def page_cross_case_analysis():
                                     mime="text/markdown",
                                     use_container_width=True
                                 )
+                            st.markdown('</div>', unsafe_allow_html=True)
                         else:
                             st.error(f"❌ Analysis failed: {result.get('error', 'Unknown error')}")
                             st.info("💡 **Tips:**")
@@ -2015,11 +2029,7 @@ def main():
         if st.session_state.case_id:
             st.info(f"**Current Case:** {st.session_state.case_id}")
         
-        st.markdown("---")
-        st.markdown("### 📚 Quick Links")
-        st.markdown("- [Documentation]()")
-        st.markdown("- [User Guide]()")
-        st.markdown("- [Support]()")
+
     
     # Render selected page
     if selected_page in pages:

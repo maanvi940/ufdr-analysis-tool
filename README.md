@@ -1,6 +1,4 @@
-# AI-Based UFDR Analysis Tool 🔍
-
-## SIH 2025 - Problem Statement ID: SIH25198
+# UFDR Analysis Tool 🔍
 
 An advanced AI-powered forensic analysis tool for processing Universal Forensic Extraction Device Reports (UFDR) with local LLM integration, semantic search, and knowledge graphs - designed for government security requirements with complete offline capability.
 
@@ -31,15 +29,15 @@ During digital forensic investigations, UFDR reports from seized devices contain
 
 ```
 ┌──────────────────────────────────────────────────┐
-│                 Frontend (Streamlit)              │
+│                 Frontend (Streamlit)             │
 ├──────────────────────────────────────────────────┤
-│                  Backend API                      │
-├──────────┬──────────┬──────────┬────────────────┤
+│                  Backend API                     │
+├──────────┬──────────┬──────────┬─────────────────┤
 │   UFDR   │  Vector  │   RAG    │  Knowledge     │
-│  Parser  │  Index   │  Engine  │    Graph       │
-├──────────┴──────────┴──────────┴────────────────┤
+│  Parser  │  Index   │  Engine  │    Graph        │
+├──────────┴──────────┴──────────┴─────────────────┤
 │          Local Infrastructure                    │
-│  • FAISS  • Neo4j  • LLaMA  • Embeddings        │
+│  • FAISS    • SQLite   • Embeddings             │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -70,39 +68,66 @@ source venv/bin/activate
 
 3. **Install dependencies**
 ```bash
-# Core dependencies
 pip install -r requirements.txt
-
-# NLP and vector indexing
-pip install -r requirements-nlp.txt
-
-# Graph database
-pip install -r requirements-graph.txt
-
-# Media processing
-pip install -r requirements-media.txt
-
-# Frontend
-pip install -r requirements-frontend.txt
 ```
 
-4. **Download models (for offline use)**
+4. **Set up environment**
 ```bash
-# Download embedding model
-python scripts/download_models.py --type embeddings
-
-# Download quantized LLM (e.g., LLaMA 2 7B GGUF)
-python scripts/download_models.py --type llm
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
-5. **Set up Neo4j (Docker)**
+5. **Launch Web Interface**
 ```bash
-docker run -d \
-  --name neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/password123 \
-  -v $PWD/neo4j/data:/data \
-  neo4j:latest
+streamlit run frontend/app.py
+```
+
+Navigate to `http://localhost:8501`
+
+## 📊 Project Structure
+
+```
+ufdr-analysis-tool/
+├── parser/              # UFDR extraction and parsing
+│   ├── ufdr_unzip.py   # Secure extraction with SHA256
+│   ├── ufdr_parser.py  # Streaming XML parser
+│   ├── ufdr_ingestor.py
+│   └── ingest_cli.py   # Unified ingestion pipeline
+├── ingest/             # Data ingestion and processing
+│   ├── file_ingestor.py
+│   ├── database_writer.py
+│   ├── entity_resolver.py
+│   ├── timestamp_harmonizer.py
+│   ├── cross_case_linker.py
+│   └── ...
+├── rag/                # Semantic search and RAG
+│   ├── indexer.py      # FAISS index creation
+│   ├── retriever.py    # Search and ranking
+│   ├── embeddings.py   # Local embedding models
+│   ├── query_engine.py # RAG query processing
+│   └── llm_client.py   # Local/cloud LLM clients
+├── media/              # Media processing
+│   ├── ocr_worker.py   # OCR for images
+│   ├── asr_worker.py   # Speech-to-text
+│   ├── video_processor.py
+│   └── ...
+├── visualization/      # Data visualization
+│   ├── network_viz.py  # Network graph visualization
+│   ├── geo_viz.py      # Geographic visualization
+│   ├── timeline_viz.py
+│   └── ...
+├── database/           # Database layer
+│   ├── schema.py      # SQLAlchemy models
+│   ├── query_executor.py
+│   └── ...
+├── utils/              # Utilities
+├── frontend/           # Streamlit UI
+│   ├── app.py         # Main application
+│   └── components/    # UI components
+├── scripts/           # Utility scripts
+├── prompts/           # RAG prompt templates
+├── test_data/        # Sample test data
+└── requirements.txt   # Python dependencies
 ```
 
 ## 🔧 Usage
@@ -115,97 +140,33 @@ python parser/ingest_cli.py evidence.ufdr \
   --operator "Inspector Name"
 ```
 
-Output:
-```
-✓ UFDR Ingestion Successful!
-  Case ID:     CASE001
-  SHA256:      a3b4c5d6e7f8...
-  Statistics:
-    - Messages: 15,234
-    - Calls: 892
-    - Contacts: 456
-```
-
 ### 2. Build Vector Index
 
 ```bash
-python vector/index_builder.py \
-  --case-id CASE001 \
-  --parsed-dir data/parsed
+python rag/indexer.py \
+  --case-id CASE001
 ```
 
-### 3. Launch Web Interface
+### 3. Query via Web Interface
 
 ```bash
 streamlit run frontend/app.py
 ```
 
-Navigate to `http://localhost:8501`
-
 ### 4. Query via CLI
 
 ```bash
 # Natural language query
-python nlp/query.py "show messages with crypto addresses from foreign numbers"
-
-# Find specific patterns
-python vector/retriever.py "bitcoin transfer" --crypto --case-id CASE001
-
-# Export results
-python vector/retriever.py "suspicious activity" \
-  --export results.json \
-  --format json
+python -m rag.query_engine "show messages with crypto addresses"
 ```
 
 ## 🔍 Example Queries
 
-### Natural Language Queries
 - "Show me all messages containing cryptocurrency addresses"
 - "List communications with foreign phone numbers in the last month"
 - "Find all contacts who communicated with +1-555-0123"
 - "Show deleted messages recovered from WhatsApp"
 - "Find images shared between midnight and 6 AM"
-
-### Graph Queries (Cypher)
-```cypher
-// Find all contacts of a specific person
-MATCH (p:Person {phone: "+919876543210"})-[:CONTACT_OF]-(c:Person)
-RETURN p, c
-
-// Find message chains involving crypto
-MATCH (m:Message)-[:MENTIONS]->(crypto:CryptoAddress)
-RETURN m, crypto LIMIT 50
-```
-
-## 📊 Project Structure
-
-```
-ufdr-analysis-tool/
-├── parser/              # UFDR extraction and parsing
-│   ├── ufdr_unzip.py   # Secure extraction with SHA256
-│   ├── ufdr_parser.py  # Streaming XML parser
-│   └── ingest_cli.py   # Unified ingestion pipeline
-├── vector/             # Semantic search
-│   ├── index_builder.py # FAISS index creation
-│   └── retriever.py    # Search and ranking
-├── nlp/               # NLP and RAG
-│   ├── rag_engine.py  # Local LLM RAG
-│   └── prompts/       # Prompt templates
-├── graph/             # Knowledge graph
-│   ├── schema.cypher  # Neo4j schema
-│   ├── ingest_to_neo4j.py
-│   └── nl2cypher.py  # Natural language to Cypher
-├── frontend/          # User interface
-│   └── app.py        # Streamlit application
-├── media/            # Media processing
-│   ├── ocr_worker.py # OCR for images
-│   └── asr_worker.py # Speech-to-text
-├── infra/            # Infrastructure
-│   ├── docker/       # Container configs
-│   ├── models/       # Model storage
-│   └── offline_bundle/ # Air-gap installer
-└── docs/             # Documentation
-```
 
 ## 🛡️ Security Features
 
@@ -213,48 +174,22 @@ ufdr-analysis-tool/
 - **SHA256 Hashing:** Every ingested file is hashed before processing
 - **Audit Trail:** Complete activity logging with timestamps
 - **Chain of Custody:** Maintains legal admissibility of evidence
-- **Immutable Storage:** Write-once audit logs
 
 ### Access Control
 - Role-based permissions (Viewer, Analyst, Investigator, Admin)
 - JWT-based authentication
 - Session management
-- Activity monitoring
 
 ### Data Protection
 - AES-256 encryption at rest
-- TLS for internal services
 - Secure key management
 - No external data transmission
-
-## 🚀 Deployment
-
-### Development
-```bash
-python run_dev.py
-```
-
-### Production (Docker Compose)
-```bash
-docker-compose up -d
-```
-
-### Air-Gapped Installation
-```bash
-# On internet-connected machine
-./scripts/prepare_offline_bundle.sh
-
-# Transfer bundle to air-gapped system
-# On air-gapped machine
-./infra/offline_installer.sh
-```
 
 ## 📈 Performance
 
 - **Ingestion Speed:** ~10,000 artifacts/minute
 - **Search Latency:** <100ms for semantic search
 - **LLM Response:** 2-5 seconds with quantized models
-- **Concurrent Users:** Supports 10+ investigators
 
 ## 🧪 Testing
 
@@ -269,48 +204,33 @@ pytest tests/integration
 pytest --cov=. tests/
 ```
 
-## 📝 API Documentation
-
-### REST API Endpoints
-
-```
-POST   /api/ingest      # Upload and process UFDR
-GET    /api/search      # Semantic search
-POST   /api/query       # Natural language query
-GET    /api/graph       # Graph visualization data
-GET    /api/export      # Export results
-```
-
 ## 🤝 Contributing
 
-Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development guidelines.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
 ## 📄 License
 
-This project is developed for Smart India Hackathon 2025. 
+This project is developed for Smart India Hackathon 2025.
 Usage rights are subject to competition rules and MHA/NSG requirements.
 
 ## 👥 Team
 
-- **Team Name:** [Your Team Name]
-- **Institution:** [Your Institution]
+- **Team Name:** Your Team Name
+- **Institution:** Your Institution
 - **Hackathon:** SIH 2025
-
-## 🙏 Acknowledgments
-
-- Ministry of Home Affairs (MHA)
-- National Security Guard (NSG)
-- Smart India Hackathon organizers
 
 ## 📞 Support
 
 For deployment assistance or technical queries:
 - Create an issue on GitHub
-- Contact: [your-email]
 
 ---
 
-**⚠️ Important:** This tool is designed for authorized law enforcement use only. 
+**⚠️ Important:** This tool is designed for authorized law enforcement use only.
 Ensure compliance with local laws and regulations regarding digital forensics and data privacy.
 
 **🔒 Security Note:** Never commit sensitive data, actual case files, or model weights to the repository.

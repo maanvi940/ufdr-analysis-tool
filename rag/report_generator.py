@@ -19,7 +19,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from rag import DB_PATH
-from rag.chroma_store import ChromaStore
+from rag.faiss_store import FAISSStore
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +162,7 @@ class ReportGenerator:
     
     def __init__(self, db_path: str = DB_PATH):
         self.db_path = db_path
-        self._chroma = ChromaStore()
+        self._store = FAISSStore()
         self._llm = get_llm_client()
     
     @property

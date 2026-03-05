@@ -16,12 +16,12 @@ import numpy as np
 
 # Try to import audio processing libraries
 try:
-    import whisper
+    from faster_whisper import WhisperModel
     import torch
     WHISPER_AVAILABLE = True
 except ImportError:
     WHISPER_AVAILABLE = False
-    print("Warning: whisper not installed. ASR features will be limited.")
+    print("Warning: faster-whisper not installed. ASR features will be limited.")
 
 try:
     import librosa
@@ -123,11 +123,12 @@ class ASRWorker:
         }
     
     def _init_whisper(self):
-        """Initialize Whisper model"""
+        """Initialize Faster-Whisper model"""
         try:
-            logger.info(f"Loading Whisper model: {self.model_size}")
-            self.model = whisper.load_model(self.model_size, device=self.device)
-            logger.info(f"Whisper model loaded on {self.device}")
+            logger.info(f"Loading Faster-Whisper model: {self.model_size}")
+            compute_type = "float16" if self.device == "cuda" else "int8"
+            self.model = WhisperModel(self.model_size, device=self.device, compute_type=compute_type)
+            logger.info(f"Faster-Whisper model loaded on {self.device} with {compute_type} precision")
         except Exception as e:
             logger.error(f"Failed to load Whisper model: {e}")
             self.model = None
@@ -219,7 +220,7 @@ class ASRWorker:
     
     def transcribe_audio(self, audio_path: str) -> Tuple[str, List[Dict], str, float]:
         """
-        Transcribe audio using Whisper
+        Transcribe audio using Faster-Whisper
         
         Args:
             audio_path: Path to audio file
@@ -228,50 +229,53 @@ class ASRWorker:
             Tuple of (transcript, segments, detected_language, confidence)
         """
         if not WHISPER_AVAILABLE or not self.model:
-            return "ASR not available (whisper not installed)", [], "unknown", 0.0
+            return "ASR not available (faster-whisper not installed)", [], "unknown", 0.0
         
         try:
             # Preprocess audio
             processed_path = self.preprocess_audio(audio_path)
             
-            # Transcribe with Whisper
-            transcribe_options = {
-                "verbose": False,
-                "task": "transcribe"  # vs "translate"
-            }
+            # Transcribe with Faster-Whisper
+            # segments is a generator
+            segments_generator, info = self.model.transcribe(
+                processed_path, 
+                beam_size=5,
+                language=self.language,
+                vad_filter=True  # useful for silence filtering
+            )
             
-            if self.language:
-                transcribe_options["language"] = self.language
-            
-            # Perform transcription
-            result = self.model.transcribe(processed_path, **transcribe_options)
-            
-            # Extract full transcript
-            transcript = result.get("text", "").strip()
-            
-            # Extract timestamped segments
+            # Collect segments
             segments = []
-            for segment in result.get("segments", []):
+            full_transcript = []
+            avg_logprob = 0.0
+            
+            for segment in segments_generator:
+                text = segment.text.strip()
+                full_transcript.append(text)
                 segments.append({
-                    "start": segment.get("start", 0.0),
-                    "end": segment.get("end", 0.0),
-                    "text": segment.get("text", "").strip(),
-                    "confidence": segment.get("avg_logprob", 0.0)
+                    "start": segment.start,
+                    "end": segment.end,
+                    "text": text,
+                    "confidence": np.exp(segment.avg_logprob) # fast-whisper returns logprob
                 })
+                avg_logprob += segment.avg_logprob
             
-            # Get detected language
-            detected_language = result.get("language", "unknown")
+            transcript = " ".join(full_transcript)
+            detected_language = info.language
+            language_probability = info.language_probability
             
-            # Calculate average confidence (convert from log prob)
+            # Calculate overall confidence
             if segments:
-                avg_confidence = np.mean([s["confidence"] for s in segments])
-                # Convert log probability to confidence percentage
-                confidence = max(0, min(1, np.exp(avg_confidence)))
+                # Use language probability combined with average segment confidence
+                # But info.language_probability is for language detection confidence
+                # Average segment confidence is a better metric for transcript accuracy
+                avg_conf = np.mean([s["confidence"] for s in segments])
+                confidence = avg_conf
             else:
                 confidence = 0.0
             
             # Clean up temporary file
-            if processed_path != audio_path:
+            if processed_path != str(audio_path):
                 try:
                     os.remove(processed_path)
                 except:

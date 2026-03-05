@@ -12,10 +12,7 @@ try:
 except ImportError:
     render_ufdr_upload = None
 
-try:
-    from .ufdr_file_browser import render_file_browser
-except ImportError:
-    render_file_browser = None
+render_file_browser = None
 
 __all__ = [
     'render_ufdr_upload',

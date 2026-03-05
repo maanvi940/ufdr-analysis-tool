@@ -1,29 +1,30 @@
 """
 Local Embedding Function for UFDR RAG Engine
 
-Uses ChromaDB's built-in SentenceTransformerEmbeddingFunction with
-all-MiniLM-L6-v2 (22MB model, 384 dimensions, runs on CPU).
+Uses SentenceTransformer directly (no ChromaDB wrapper).
+Model: all-MiniLM-L6-v2 (22MB, 384 dimensions, runs on CPU).
 
 NO API KEY NEEDED — model auto-downloads on first use (~90MB one-time).
-
-If the download is interrupted, the module will try to load from the
-local HuggingFace cache (where partial/complete downloads are stored).
 """
 
 import os
 import logging
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 # Default model — small, fast, good quality for general semantic search
 DEFAULT_MODEL = "all-MiniLM-L6-v2"
 
-# Suppress ChromaDB telemetry errors
+# Suppress telemetry
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "false")
 
+# Model cache (singleton per model name)
+_model_cache: dict = {}
 
-def _find_cached_model_path(model_name: str):
+
+def _find_cached_model_path(model_name: str) -> Optional[str]:
     """
     Find the local cache path for a HuggingFace model.
     Returns the snapshot directory path if found, else None.
@@ -38,14 +39,11 @@ def _find_cached_model_path(model_name: str):
     if not snapshots_dir.exists():
         return None
     
-    # Get the latest snapshot
     snapshots = list(snapshots_dir.iterdir())
     if not snapshots:
         return None
     
     snapshot = snapshots[0]
-    
-    # Verify essential files exist
     model_file = snapshot / "model.safetensors"
     config_file = snapshot / "config.json"
     
@@ -56,26 +54,30 @@ def _find_cached_model_path(model_name: str):
     return None
 
 
-def get_embedding_function(model_name: str = DEFAULT_MODEL):
+def get_embedder(model_name: str = DEFAULT_MODEL):
     """
-    Get the local embedding function for ChromaDB.
-    
-    Uses SentenceTransformerEmbeddingFunction which runs entirely locally.
-    Tries to load from local cache first; falls back to downloading.
+    Get a SentenceTransformer model instance (cached singleton).
     
     Args:
-        model_name: SentenceTransformer model name (default: all-MiniLM-L6-v2)
+        model_name: SentenceTransformer model name
         
     Returns:
-        ChromaDB-compatible embedding function
+        SentenceTransformer model instance
     """
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+    if model_name in _model_cache:
+        return _model_cache[model_name]
     
-    # Try loading normally (will use cache if model was already downloaded)
+    from sentence_transformers import SentenceTransformer
+    
+    # Suppress harmless "UNEXPECTED position_ids" warnings from transformers
+    logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
+    
+    # Try loading normally
     try:
-        ef = SentenceTransformerEmbeddingFunction(model_name=model_name)
-        logger.info(f"Loaded local embedding model: {model_name}")
-        return ef
+        model = SentenceTransformer(model_name)
+        logger.info(f"Loaded embedding model: {model_name}")
+        _model_cache[model_name] = model
+        return model
     except Exception as e:
         logger.warning(f"Standard model load failed: {e}")
     
@@ -84,9 +86,10 @@ def get_embedding_function(model_name: str = DEFAULT_MODEL):
     if cached_path:
         try:
             logger.info(f"Attempting to load from cache: {cached_path}")
-            ef = SentenceTransformerEmbeddingFunction(model_name=cached_path)
+            model = SentenceTransformer(cached_path)
             logger.info(f"Loaded embedding model from cache: {cached_path}")
-            return ef
+            _model_cache[model_name] = model
+            return model
         except Exception as e2:
             logger.error(f"Cache load also failed: {e2}")
     
@@ -110,5 +113,13 @@ def embed_texts(texts: list[str], model_name: str = DEFAULT_MODEL) -> list[list[
     Returns:
         List of embedding vectors (each 384 dims for default model)
     """
-    ef = get_embedding_function(model_name)
-    return ef(texts)
+    model = get_embedder(model_name)
+    embeddings = model.encode(texts, normalize_embeddings=True)
+    return embeddings.tolist()
+
+
+# Backward compatibility — old code may import get_embedding_function
+def get_embedding_function(model_name: str = DEFAULT_MODEL):
+    """Legacy wrapper for backward compatibility with old ChromaDB code."""
+    logger.warning("get_embedding_function() is deprecated. Use get_embedder() instead.")
+    return get_embedder(model_name)

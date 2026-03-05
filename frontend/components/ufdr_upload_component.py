@@ -102,7 +102,7 @@ def render_ufdr_upload():
             return
         
         # Process button
-        if st.button("🚀 Upload and Process", type="primary", use_container_width=True):
+        if st.button("🚀 Upload and Process", type="primary", width="stretch"):
             case_metadata = {
                 "case_name": case_name,
                 "examiner_name": examiner_name,
@@ -185,9 +185,9 @@ def process_ufdr_file(uploaded_file, case_metadata):
             else:
                 st.warning("⚠️ No data to index, but case was created")
                 
-        except ImportError:
-            st.warning("⚠️ RAG indexing not available (install chromadb & rank_bm25)")
-            logger.warning("RAG dependencies not installed, skipping indexing")
+        except ImportError as e:
+            st.warning(f"⚠️ RAG indexing not available (missing dependency: {e})")
+            logger.warning(f"RAG dependencies not installed, skipping indexing: {e}")
         except Exception as e:
             st.warning(f"⚠️ Search indexing had issues: {e}")
             logger.warning(f"RAG indexing failed: {e}", exc_info=True)
@@ -535,11 +535,6 @@ def auto_process_media(case_id):
         # This would call the actual media processing pipeline
         # For now, just return a placeholder
         st.info("ℹ️ Media processing integration pending")
-        st.info("💡 This would call:")
-        st.code("""
-from backend.comprehensive_media_search import process_case_media
-results = process_case_media(case_id, use_llm=False)
-        """)
         
         return {"processed": 0, "success": True}
         

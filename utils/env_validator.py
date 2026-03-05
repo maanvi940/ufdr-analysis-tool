@@ -195,7 +195,9 @@ def check_env_file_exists() -> Tuple[bool, str]:
     Returns:
         Tuple of (exists, message)
     """
-    env_file = Path('.env')
+    # Use absolute path relative to this file (utils/env_validator.py -> project_root/.env)
+    project_root = Path(__file__).resolve().parent.parent
+    env_file = project_root / ".env"
     
     if not env_file.exists():
         message = """

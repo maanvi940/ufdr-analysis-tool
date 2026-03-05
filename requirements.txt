@@ -1,16 +1,18 @@
 # UFDR Analysis Tool - Dependencies
-# Offline-first RAG architecture
+# Production-grade RAG architecture
 
 # === Frontend ===
 streamlit>=1.28.0
 
 # === RAG Engine (all local, no API key needed) ===
-chromadb>=0.4.0                   # Local vector store + sentence-transformers
-rank_bm25>=0.2.2                  # BM25 keyword search (pure Python)
+faiss-cpu>=1.7.4                  # Facebook AI Similarity Search — fast vector search
+bm25s>=0.2.0                     # Fast BM25 via SciPy sparse matrices (500x faster)
+flashrank>=0.2.0                  # Ultra-lightweight cross-encoder re-ranker (4MB)
+sentence-transformers>=2.2.0      # Local embedding model (all-MiniLM-L6-v2)
 
 # === LLM API (only cloud component, needs API key) ===
 google-generativeai>=0.3.0        # Gemini API for reasoning/reports
-openai>=1.0.0                       # OpenAI/OpenRouter client
+openai>=1.0.0                     # OpenAI/OpenRouter client
 
 # === Database ===
 sqlalchemy>=2.0.0
@@ -28,6 +30,29 @@ pydantic>=2.0.0
 # === XML Processing ===
 lxml>=4.9.0
 xmltodict>=0.13.0
+
+# === Visualization ===
+folium>=0.14.0
+networkx>=3.0.0
+plotly>=5.15.0
+opencv-python>=4.8.0
+
+# === Media Processing ===
+pillow>=10.0.0                    # Image processing (PIL)
+pytesseract>=0.3.10               # OCR text extraction
+faster-whisper>=0.10.0            # Speech-to-text
+torch>=2.0.0                      # ML framework (CPU version)
+librosa>=0.10.0                   # Audio analysis
+soundfile>=0.12.0                 # Audio I/O
+pydub>=0.23.0                     # Audio format conversion
+
+# === Archive Support ===
+py7zr>=0.20.0                     # 7z archive extraction
+python-magic>=0.4.27              # MIME type detection
+
+# === Utilities ===
+chardet>=5.0.0
+sqlparse>=0.4.0
 
 # === Testing ===
 pytest>=7.0.0

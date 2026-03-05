@@ -51,9 +51,37 @@ def chunk_message(row: dict, case_id: str) -> tuple[str, dict, str]:
 
 def chunk_contact(row: dict, case_id: str) -> tuple[str, dict, str]:
     """Convert a contact record into a searchable text chunk."""
+    import json as _json
+    
     name = row.get("name", "Unknown")
+    
+    # Try direct fields first, then parse JSON phone_numbers column
     phone = row.get("phone_raw", row.get("phone_digits", row.get("phone", "")))
+    if not phone:
+        raw_phones = row.get("phone_numbers", "")
+        if raw_phones:
+            try:
+                parsed = _json.loads(raw_phones) if isinstance(raw_phones, str) else raw_phones
+                if isinstance(parsed, list):
+                    phone = ", ".join(str(p) for p in parsed if p)
+                else:
+                    phone = str(parsed)
+            except Exception:
+                phone = str(raw_phones)
+    
+    # Try direct email field, then parse JSON emails column
     email = row.get("email", "")
+    if not email:
+        raw_emails = row.get("emails", "")
+        if raw_emails:
+            try:
+                parsed = _json.loads(raw_emails) if isinstance(raw_emails, str) else raw_emails
+                if isinstance(parsed, list):
+                    email = ", ".join(str(e) for e in parsed if e)
+                else:
+                    email = str(parsed)
+            except Exception:
+                email = str(raw_emails)
     
     text = f"Contact: {name}"
     if phone:

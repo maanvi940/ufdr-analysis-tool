@@ -11,7 +11,24 @@ import subprocess
 from pathlib import Path
 from typing import List, Dict, Optional
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
+from PIL import Image
+import numpy as np
+
+# Try to import ML libraries
+try:
+    from ultralytics import YOLO
+    YOLO_AVAILABLE = True
+except ImportError:
+    YOLO_AVAILABLE = False
+    print("Warning: ultralytics not installed. Object detection limited.")
+
+try:
+    from sentence_transformers import SentenceTransformer
+    CLIP_AVAILABLE = True
+except ImportError:
+    CLIP_AVAILABLE = False
+    print("Warning: sentence-transformers not installed. Image embedding limited.")
 
 # Try to import video processing libraries
 try:
@@ -53,6 +70,8 @@ class VideoFrame:
     ocr_text: str
     confidence: float
     metadata: Dict
+    detections: List[str] = field(default_factory=list)
+    embedding: Optional[List[float]] = None
 
 
 @dataclass
@@ -110,8 +129,67 @@ class VideoProcessor:
         # Supported video formats
         self.supported_formats = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.m4v'}
         
+        # Initialize YOLO and CLIP
+        self.yolo_model = None
+        if YOLO_AVAILABLE:
+            try:
+                self.yolo_model = YOLO("yolov8n.pt") # Load nano model
+            except Exception as e:
+                logger.error(f"Failed to load YOLO: {e}")
+
+        self.clip_model = None
+        if CLIP_AVAILABLE:
+            try:
+                self.clip_model = SentenceTransformer('clip-ViT-B-32')
+            except Exception as e:
+                logger.error(f"Failed to load CLIP: {e}")
+
         # Check FFmpeg availability
         self.ffmpeg_available = self._check_ffmpeg()
+
+    def analyze_frame(self, frame_path: Path, timestamp: float, frame_index: int, case_id: str, fps: float, method: str) -> VideoFrame:
+        """Run OCR, Object Detection, and Embedding on a frame"""
+        ocr_text = ""
+        confidence = 0.0
+        detections = []
+        embedding = None
+
+        try:
+            # 1. OCR
+            if self.ocr_worker and frame_path.exists():
+                ocr_result = self.ocr_worker.process_image(str(frame_path), case_id)
+                ocr_text = ocr_result.text
+                confidence = ocr_result.confidence
+
+            # 2. YOLO Object Detection
+            if self.yolo_model and frame_path.exists():
+                results = self.yolo_model(str(frame_path), verbose=False)
+                for r in results:
+                    for c in r.boxes.cls:
+                        detections.append(self.yolo_model.names[int(c)])
+                detections = list(set(detections)) # Deduplicate
+
+            # 3. CLIP Embedding
+            if self.clip_model and frame_path.exists():
+                image = Image.open(frame_path)
+                embedding = self.clip_model.encode(image).tolist()
+
+        except Exception as e:
+            logger.error(f"Frame analysis failed for {frame_path}: {e}")
+
+        return VideoFrame(
+            timestamp=timestamp,
+            frame_index=frame_index,
+            frame_path=str(frame_path),
+            ocr_text=ocr_text,
+            confidence=confidence,
+            metadata={
+                'video_fps': fps,
+                'extraction_method': method
+            },
+            detections=detections,
+            embedding=embedding
+        )
     
     def _check_ffmpeg(self) -> bool:
         """Check if FFmpeg is available"""
@@ -256,27 +334,12 @@ class VideoProcessor:
                         .run(capture_output=True, check=True)
                     )
                     
-                    # Analyze frame with OCR if available
-                    ocr_text = ""
-                    confidence = 0.0
-                    
-                    if self.ocr_worker and frame_path.exists():
-                        ocr_result = self.ocr_worker.process_image(str(frame_path), case_id)
-                        ocr_text = ocr_result.text
-                        confidence = ocr_result.confidence
-                    
-                    # Create VideoFrame
-                    frame = VideoFrame(
-                        timestamp=timestamp,
-                        frame_index=i,
-                        frame_path=str(frame_path),
-                        ocr_text=ocr_text,
-                        confidence=confidence,
-                        metadata={
-                            'video_fps': fps,
-                            'extraction_method': 'ffmpeg'
-                        }
+                    # Analyze frame
+                    frame = self.analyze_frame(
+                        frame_path, timestamp, i, case_id, fps, 'ffmpeg'
                     )
+                    
+                    keyframes.append(frame)
                     
                     keyframes.append(frame)
                     
@@ -327,27 +390,12 @@ class VideoProcessor:
                     # Save frame
                     cv2.imwrite(str(frame_path), frame)
                     
-                    # Analyze frame with OCR if available
-                    ocr_text = ""
-                    confidence = 0.0
-                    
-                    if self.ocr_worker and frame_path.exists():
-                        ocr_result = self.ocr_worker.process_image(str(frame_path), case_id)
-                        ocr_text = ocr_result.text
-                        confidence = ocr_result.confidence
-                    
-                    # Create VideoFrame
-                    video_frame = VideoFrame(
-                        timestamp=timestamp,
-                        frame_index=extracted_count,
-                        frame_path=str(frame_path),
-                        ocr_text=ocr_text,
-                        confidence=confidence,
-                        metadata={
-                            'video_fps': fps,
-                            'extraction_method': 'opencv'
-                        }
+                    # Analyze frame
+                    video_frame = self.analyze_frame(
+                        frame_path, timestamp, extracted_count, case_id, fps, 'opencv'
                     )
+                    
+                    keyframes.append(video_frame)
                     
                     keyframes.append(video_frame)
                     extracted_count += 1
